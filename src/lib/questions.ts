@@ -7,6 +7,7 @@ export type Question = {
   id: string;
   scenarioTitle: string;
   scenarioBody: string;
+  screenshotSrc?: string; // public/ path (optional while we backfill)
   augments: [AugmentOption, AugmentOption, AugmentOption];
   topPickAugmentId: string;
   streamerName: string;
@@ -20,52 +21,60 @@ export const QUESTIONS: Question[] = [
     scenarioTitle: "patch16.03b_scenario00001",
     scenarioBody:
       "Stage 2-1. Mixed items, no committed trait. Looking for flexible power.",
+    screenshotSrc: "/scenarios/patch16.03b/patch16.03b_scenario00001.png",
     augments: [
       { id: "a", name: "Augment A" },
       { id: "b", name: "Augment B" },
       { id: "c", name: "Augment C" },
     ],
     topPickAugmentId: "b",
-    streamerName: "Streamer 1",
+    streamerName: "Dishsoap",
+    streamerUrl: "https://www.twitch.tv/dishsoap",
   },
   {
     id: "patch16.03b_scenario00002",
     scenarioTitle: "patch16.03b_scenario00002",
     scenarioBody:
       "Stage 2-1. You have upgraded units and can likely win-streak. Prioritize tempo.",
+    screenshotSrc: "/scenarios/patch16.03b/patch16.03b_scenario00002.png",
     augments: [
       { id: "a", name: "Augment A" },
       { id: "b", name: "Augment B" },
       { id: "c", name: "Augment C" },
     ],
     topPickAugmentId: "a",
-    streamerName: "Streamer 2",
+    streamerName: "Dishsoap",
+    streamerUrl: "https://www.twitch.tv/dishsoap",
   },
   {
     id: "patch16.03b_scenario00003",
     scenarioTitle: "patch16.03b_scenario00003",
     scenarioBody:
       "Stage 2-1. Likely to lose-streak. Value econ/long-term power.",
+    screenshotSrc: "/scenarios/patch16.03b/patch16.03b_scenario00003.png",
     augments: [
       { id: "a", name: "Augment A" },
       { id: "b", name: "Augment B" },
       { id: "c", name: "Augment C" },
     ],
     topPickAugmentId: "c",
-    streamerName: "Streamer 3",
+    streamerName: "Dishsoap",
+    streamerUrl: "https://www.twitch.tv/dishsoap",
   },
   {
     id: "patch16.03b_scenario00004",
     scenarioTitle: "patch16.03b_scenario00004",
     scenarioBody:
       "Stage 2-1. You already have a trait angle forming. Choose the augment that supports it.",
+    screenshotSrc: "/scenarios/patch16.03b/patch16.03b_scenario00004.png",
     augments: [
       { id: "a", name: "Augment A" },
       { id: "b", name: "Augment B" },
       { id: "c", name: "Augment C" },
     ],
     topPickAugmentId: "a",
-    streamerName: "Streamer 4",
+    streamerName: "Dishsoap",
+    streamerUrl: "https://www.twitch.tv/dishsoap",
   },
   {
     id: "patch16.03b_scenario00005",
