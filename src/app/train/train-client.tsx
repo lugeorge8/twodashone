@@ -14,7 +14,7 @@ export default function TrainClient() {
 
   const [idx, setIdx] = useState(0);
   const [choice, setChoice] = useState<ChoiceState | null>(null);
-  const [showRerollRow, setShowRerollRow] = useState(false);
+  const [rerolled, setRerolled] = useState({ a: false, b: false, c: false });
 
   const q = questions[idx];
   const isDone = idx >= questions.length;
@@ -26,13 +26,13 @@ export default function TrainClient() {
 
   function next() {
     setChoice(null);
-    setShowRerollRow(false);
+    setRerolled({ a: false, b: false, c: false });
     setIdx((v) => v + 1);
   }
 
   function restart() {
     setChoice(null);
-    setShowRerollRow(false);
+    setRerolled({ a: false, b: false, c: false });
     setIdx(0);
   }
 
@@ -61,12 +61,19 @@ export default function TrainClient() {
     );
   }
 
-  const topRow = q.augments.filter((a) => a.id === "a" || a.id === "b" || a.id === "c");
-  const rerollRow = q.augments.filter(
-    (a) => a.id === "a1" || a.id === "b1" || a.id === "c1",
-  );
+  const getAugment = (id: string) => q.augments.find((a) => a.id === id);
 
-  const visibleAugments = showRerollRow ? rerollRow : topRow;
+  const hasA1 = !!getAugment("a1");
+  const hasB1 = !!getAugment("b1");
+  const hasC1 = !!getAugment("c1");
+
+  const slotA = rerolled.a && hasA1 ? getAugment("a1") : getAugment("a");
+  const slotB = rerolled.b && hasB1 ? getAugment("b1") : getAugment("b");
+  const slotC = rerolled.c && hasC1 ? getAugment("c1") : getAugment("c");
+
+  const visibleAugments = [slotA, slotB, slotC].filter(
+    (x): x is NonNullable<typeof x> => Boolean(x),
+  );
 
   const best = q.augments.find((a) => a.id === q.topPickAugmentId);
   const picked = choice
@@ -100,38 +107,59 @@ export default function TrainClient() {
         </div>
       )}
 
-      <div className="mt-6 flex items-center justify-between">
-        <div className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-          {showRerollRow ? "Reroll row" : "Top row"}
-        </div>
-        <button
-          type="button"
-          onClick={() => setShowRerollRow(true)}
-          disabled={!!choice || showRerollRow || rerollRow.length === 0}
-          className="h-9 rounded-xl border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-800 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900"
-        >
-          Reroll
-        </button>
-      </div>
-
-      <div className="mt-3 grid gap-3">
+      <div className="mt-6 grid gap-3">
         {visibleAugments.map((a) => {
           const selected = choice?.chosenAugmentId === a.id;
+
+          const base = a.id[0] as "a" | "b" | "c";
+          const hasReroll =
+            (base === "a" && hasA1 && !rerolled.a) ||
+            (base === "b" && hasB1 && !rerolled.b) ||
+            (base === "c" && hasC1 && !rerolled.c);
+
           return (
-            <button
+            <div
               key={a.id}
-              onClick={() => onChoose(a.id)}
-              disabled={!!choice}
               className={
-                "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left text-sm font-medium transition-colors " +
+                "flex w-full items-stretch overflow-hidden rounded-xl border transition-colors " +
                 (selected
-                  ? "border-black bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-black"
-                  : "border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900")
+                  ? "border-black dark:border-white"
+                  : "border-zinc-200 dark:border-zinc-800")
               }
             >
-              <span>{a.name}</span>
-              <span className="text-xs opacity-70">Pick</span>
-            </button>
+              <button
+                onClick={() => onChoose(a.id)}
+                disabled={!!choice}
+                className={
+                  "flex flex-1 items-center justify-between px-4 py-3 text-left text-sm font-medium transition-colors " +
+                  (selected
+                    ? "bg-zinc-900 text-white dark:bg-white dark:text-black"
+                    : "bg-white text-zinc-900 hover:bg-zinc-50 disabled:opacity-60 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900")
+                }
+              >
+                <span className="truncate">{a.name}</span>
+                <span className="ml-3 text-xs opacity-70">Pick</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setRerolled((r) => ({
+                    ...r,
+                    [base]: true,
+                  }))
+                }
+                disabled={!!choice || !hasReroll}
+                className={
+                  "flex w-24 items-center justify-center border-l px-3 text-xs font-medium transition-colors " +
+                  (selected
+                    ? "border-black bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-black"
+                    : "border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900")
+                }
+              >
+                Reroll
+              </button>
+            </div>
           );
         })}
       </div>
