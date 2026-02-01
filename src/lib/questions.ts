@@ -16,8 +16,8 @@ export type Question = {
 // NOTE: Hardcoded MVP dataset (10 questions). Replace placeholders with real scenarios.
 export const QUESTIONS: Question[] = [
   {
-    id: "q1",
-    scenarioTitle: "Generic opener (no direction)",
+    id: "patch16.03b_scenario00001",
+    scenarioTitle: "patch16.03b_scenario00001",
     scenarioBody:
       "Stage 2-1. Mixed items, no committed trait. Looking for flexible power.",
     augments: [
@@ -29,8 +29,8 @@ export const QUESTIONS: Question[] = [
     streamerName: "Streamer 1",
   },
   {
-    id: "q2",
-    scenarioTitle: "Strong early board (win-streak)",
+    id: "patch16.03b_scenario00002",
+    scenarioTitle: "patch16.03b_scenario00002",
     scenarioBody:
       "Stage 2-1. You have upgraded units and can likely win-streak. Prioritize tempo.",
     augments: [
@@ -42,8 +42,8 @@ export const QUESTIONS: Question[] = [
     streamerName: "Streamer 2",
   },
   {
-    id: "q3",
-    scenarioTitle: "Weak board (lose-streak)",
+    id: "patch16.03b_scenario00003",
+    scenarioTitle: "patch16.03b_scenario00003",
     scenarioBody:
       "Stage 2-1. Likely to lose-streak. Value econ/long-term power.",
     augments: [
@@ -55,8 +55,8 @@ export const QUESTIONS: Question[] = [
     streamerName: "Streamer 3",
   },
   {
-    id: "q4",
-    scenarioTitle: "Clear trait direction", 
+    id: "patch16.03b_scenario00004",
+    scenarioTitle: "patch16.03b_scenario00004",
     scenarioBody:
       "Stage 2-1. You already have a trait angle forming. Choose the augment that supports it.",
     augments: [
@@ -68,8 +68,8 @@ export const QUESTIONS: Question[] = [
     streamerName: "Streamer 4",
   },
   {
-    id: "q5",
-    scenarioTitle: "Item-dependent line",
+    id: "patch16.03b_scenario00005",
+    scenarioTitle: "patch16.03b_scenario00005",
     scenarioBody:
       "Stage 2-1. Your items strongly suggest a carry direction. Pick the augment that spikes that plan.",
     augments: [
@@ -81,8 +81,8 @@ export const QUESTIONS: Question[] = [
     streamerName: "Streamer 5",
   },
   {
-    id: "q6",
-    scenarioTitle: "Flexible reroll vs fast 8",
+    id: "patch16.03b_scenario00006",
+    scenarioTitle: "patch16.03b_scenario00006",
     scenarioBody:
       "Stage 2-1. You can either lean into reroll or keep it open for fast 8.",
     augments: [
@@ -94,8 +94,8 @@ export const QUESTIONS: Question[] = [
     streamerName: "Streamer 6",
   },
   {
-    id: "q7",
-    scenarioTitle: "Highroll opener",
+    id: "patch16.03b_scenario00007",
+    scenarioTitle: "patch16.03b_scenario00007",
     scenarioBody:
       "Stage 2-1. You highrolled an early carry setup. Choose the highest tempo option.",
     augments: [
@@ -107,8 +107,8 @@ export const QUESTIONS: Question[] = [
     streamerName: "Streamer 7",
   },
   {
-    id: "q8",
-    scenarioTitle: "Lowroll opener",
+    id: "patch16.03b_scenario00008",
+    scenarioTitle: "patch16.03b_scenario00008",
     scenarioBody:
       "Stage 2-1. Low board strength. Stabilize later; don’t grief econ.",
     augments: [
@@ -120,8 +120,8 @@ export const QUESTIONS: Question[] = [
     streamerName: "Streamer 8",
   },
   {
-    id: "q9",
-    scenarioTitle: "Contest risk",
+    id: "patch16.03b_scenario00009",
+    scenarioTitle: "patch16.03b_scenario00009",
     scenarioBody:
       "Stage 2-1. A likely contested line is on the table. Prefer flexible outs.",
     augments: [
@@ -133,8 +133,8 @@ export const QUESTIONS: Question[] = [
     streamerName: "Streamer 9",
   },
   {
-    id: "q10",
-    scenarioTitle: "Cap vs tempo",
+    id: "patch16.03b_scenario00010",
+    scenarioTitle: "patch16.03b_scenario00010",
     scenarioBody:
       "Stage 2-1. Decide between immediate tempo and higher late-game cap.",
     augments: [
