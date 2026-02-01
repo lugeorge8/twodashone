@@ -165,12 +165,26 @@ export default function TrainClient() {
 
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  // Always allow reroll once per slot.
                   setRerolled((r) => ({
                     ...r,
                     [base]: true,
-                  }))
-                }
+                  }));
+
+                  // If the user rerolls the streamer-selected slot *and* there is no reroll augment
+                  // (A1/B1/C1 missing), treat it as an "answered" action so they can proceed.
+                  const top = q.topPickAugmentId;
+                  const topBase = (top?.[0] ?? "") as "a" | "b" | "c";
+                  const missingRerollForBase =
+                    (base === "a" && !hasA1) ||
+                    (base === "b" && !hasB1) ||
+                    (base === "c" && !hasC1);
+
+                  if (!choice && base === topBase && missingRerollForBase) {
+                    setChoice({ chosenAugmentId: top });
+                  }
+                }}
                 disabled={!!choice || !hasReroll}
                 className={
                   "flex w-24 items-center justify-center border-l px-3 text-xs font-medium transition-colors " +
