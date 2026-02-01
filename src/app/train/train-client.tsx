@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { QUESTIONS } from "@/lib/questions";
 
 type ChoiceState = {
@@ -75,6 +76,19 @@ export default function TrainClient() {
           </p>
         </div>
       </div>
+
+      {q.screenshotSrc && (
+        <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+          <Image
+            src={q.screenshotSrc}
+            alt={`${q.scenarioTitle} - stage 1-4 screenshot`}
+            width={1600}
+            height={900}
+            className="h-auto w-full"
+            priority={idx < 2}
+          />
+        </div>
+      )}
 
       <div className="mt-6 grid gap-3">
         {q.augments.map((a) => {

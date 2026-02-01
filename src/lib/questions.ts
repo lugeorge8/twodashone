@@ -7,7 +7,9 @@ export type Question = {
   id: string;
   scenarioTitle: string;
   scenarioBody: string;
-  augments: [AugmentOption, AugmentOption, AugmentOption];
+  screenshotSrc?: string; // public/ path (optional while we backfill)
+  // MVP started with 3 choices; we now allow up to 6 (A/B/C + A1/B1/C1) and hide blanks.
+  augments: AugmentOption[];
   topPickAugmentId: string;
   streamerName: string;
   streamerUrl?: string;
@@ -20,52 +22,69 @@ export const QUESTIONS: Question[] = [
     scenarioTitle: "patch16.03b_scenario00001",
     scenarioBody:
       "Stage 2-1. Mixed items, no committed trait. Looking for flexible power.",
+    screenshotSrc: "/scenarios/patch16.03b/patch16.03b_scenario00001.png",
     augments: [
-      { id: "a", name: "Augment A" },
-      { id: "b", name: "Augment B" },
-      { id: "c", name: "Augment C" },
+      { id: "a", name: "Crown's Will" },
+      { id: "b", name: "Ixtal Expeditionist" },
+      { id: "c", name: "Trade Sector" },
+      { id: "a1", name: "Heart of Steel" },
+      { id: "c1", name: "Pandora's Bench" },
     ],
     topPickAugmentId: "b",
-    streamerName: "Streamer 1",
+    streamerName: "Dishsoap",
+    streamerUrl: "https://www.twitch.tv/dishsoap",
   },
   {
     id: "patch16.03b_scenario00002",
     scenarioTitle: "patch16.03b_scenario00002",
     scenarioBody:
       "Stage 2-1. You have upgraded units and can likely win-streak. Prioritize tempo.",
+    screenshotSrc: "/scenarios/patch16.03b/patch16.03b_scenario00002.png",
     augments: [
-      { id: "a", name: "Augment A" },
-      { id: "b", name: "Augment B" },
-      { id: "c", name: "Augment C" },
+      { id: "a", name: "Backup Bows" },
+      { id: "b", name: "Ones, Twos, Threes" },
+      { id: "c", name: "Slightly Magic Roll" },
+      { id: "a1", name: "Table Scraps" },
+      { id: "b1", name: "Spoils of War I" },
     ],
-    topPickAugmentId: "a",
-    streamerName: "Streamer 2",
+    topPickAugmentId: "c",
+    streamerName: "Dishsoap",
+    streamerUrl: "https://www.twitch.tv/dishsoap",
   },
   {
     id: "patch16.03b_scenario00003",
     scenarioTitle: "patch16.03b_scenario00003",
     scenarioBody:
       "Stage 2-1. Likely to lose-streak. Value econ/long-term power.",
+    screenshotSrc: "/scenarios/patch16.03b/patch16.03b_scenario00003.png",
     augments: [
-      { id: "a", name: "Augment A" },
-      { id: "b", name: "Augment B" },
-      { id: "c", name: "Augment C" },
+      { id: "a", name: "Comeback Story" },
+      { id: "b", name: "Nine Lives" },
+      { id: "c", name: "Shimmerscale Essence" },
+      { id: "a1", name: "Band of Thieves II" },
+      { id: "b1", name: "Deadlier Caps" },
+      { id: "c1", name: "We Stick Together" },
     ],
-    topPickAugmentId: "c",
-    streamerName: "Streamer 3",
+    topPickAugmentId: "a1",
+    streamerName: "Dishsoap",
+    streamerUrl: "https://www.twitch.tv/dishsoap",
   },
   {
     id: "patch16.03b_scenario00004",
     scenarioTitle: "patch16.03b_scenario00004",
     scenarioBody:
       "Stage 2-1. You already have a trait angle forming. Choose the augment that supports it.",
+    screenshotSrc: "/scenarios/patch16.03b/patch16.03b_scenario00004.png",
     augments: [
-      { id: "a", name: "Augment A" },
-      { id: "b", name: "Augment B" },
-      { id: "c", name: "Augment C" },
+      { id: "a", name: "Solo Leveling" },
+      { id: "b", name: "Spoils of War II" },
+      { id: "c", name: "U.R.F." },
+      { id: "b1", name: "Two Much Value" },
+      { id: "c1", name: "Pilfer" },
     ],
     topPickAugmentId: "a",
-    streamerName: "Streamer 4",
+    streamerName: "Dishsoap",
+    streamerUrl: "https://www.twitch.tv/dishsoap",
   },
   {
     id: "patch16.03b_scenario00005",
