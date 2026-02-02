@@ -3,12 +3,16 @@ import os from 'node:os';
 import path from 'node:path';
 
 import type { AugmentRow } from '../google/sheets';
+import { readAugmentsFromLocalFile } from './local';
 import { readAugmentsFromSheet } from '../google/sheets';
 
 export type AugmentsSourceStatus = {
   ok: boolean;
-  source: 'google-sheet';
+  source: 'local-file' | 'google-sheet';
   details: {
+    localFilePath: string;
+    localFileExists: boolean;
+
     hasSheetId: boolean;
     sheetRange: string;
     hasGoogleClientJson: boolean;
@@ -21,6 +25,9 @@ export async function getAugmentsFromConfiguredSource(): Promise<{
   augments: AugmentRow[];
   status: AugmentsSourceStatus;
 }> {
+  const localFilePath = path.join(process.cwd(), 'src', 'data', 'augments.json');
+  const localFileExists = fs.existsSync(localFilePath);
+
   const spreadsheetId = process.env.AUGMENTS_SHEET_ID;
   const range = process.env.AUGMENTS_SHEET_RANGE ?? 'Augments!A1:F271';
 
@@ -32,8 +39,11 @@ export async function getAugmentsFromConfiguredSource(): Promise<{
 
   const statusBase: AugmentsSourceStatus = {
     ok: false,
-    source: 'google-sheet',
+    source: localFileExists ? 'local-file' : 'google-sheet',
     details: {
+      localFilePath,
+      localFileExists,
+
       hasSheetId: Boolean(spreadsheetId),
       sheetRange: range,
       hasGoogleClientJson,
@@ -41,11 +51,37 @@ export async function getAugmentsFromConfiguredSource(): Promise<{
     },
   };
 
+  // Prefer local file (works on Vercel, no Google auth required).
+  if (localFileExists) {
+    try {
+      const augments = await readAugmentsFromLocalFile({ filePath: localFilePath });
+      return {
+        augments,
+        status: {
+          ...statusBase,
+          ok: true,
+          source: 'local-file',
+        },
+      };
+    } catch (e) {
+      return {
+        augments: [],
+        status: {
+          ...statusBase,
+          source: 'local-file',
+          error: e instanceof Error ? e.message : String(e),
+        },
+      };
+    }
+  }
+
+  // Fallback to Google Sheets (requires server-side OAuth files)
   if (!spreadsheetId) {
     return {
       augments: [],
       status: {
         ...statusBase,
+        source: 'google-sheet',
         error: 'Missing AUGMENTS_SHEET_ID env var',
       },
     };
@@ -56,6 +92,7 @@ export async function getAugmentsFromConfiguredSource(): Promise<{
       augments: [],
       status: {
         ...statusBase,
+        source: 'google-sheet',
         error: 'Missing Google OAuth client/token files on server',
       },
     };
@@ -68,6 +105,7 @@ export async function getAugmentsFromConfiguredSource(): Promise<{
       status: {
         ...statusBase,
         ok: true,
+        source: 'google-sheet',
       },
     };
   } catch (e) {
@@ -75,6 +113,7 @@ export async function getAugmentsFromConfiguredSource(): Promise<{
       augments: [],
       status: {
         ...statusBase,
+        source: 'google-sheet',
         error: e instanceof Error ? e.message : String(e),
       },
     };
