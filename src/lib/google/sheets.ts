@@ -54,9 +54,12 @@ export async function readAugmentsFromSheet(params: {
 
     const description = String(r[iDesc] ?? '').trim();
 
+    // Stage columns in your sheet are maintained manually.
+    // Treat any non-empty value as "available" unless it is an explicit falsey marker.
     const isTruthy = (v: unknown) => {
       const s = String(v ?? '').trim().toLowerCase();
-      return s === '1' || s === 'true' || s === 'yes' || s === 'y' || s === 'x';
+      if (!s) return false;
+      return !(s === '0' || s === 'false' || s === 'no' || s === 'n');
     };
 
     const stages = {
