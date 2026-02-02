@@ -17,6 +17,16 @@ export default function TrainPage() {
           </div>
         </header>
 
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold">Trainer</h1>
+          <Link
+            href="/train/random"
+            className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+          >
+            Random generator →
+          </Link>
+        </div>
+
         <TrainClient />
 
         <footer className="pt-4 text-xs leading-5 text-zinc-500 dark:text-zinc-400">

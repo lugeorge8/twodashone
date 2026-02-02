@@ -67,9 +67,28 @@ export default function TrainClient() {
   const hasB1 = !!getAugment("b1");
   const hasC1 = !!getAugment("c1");
 
-  const slotA = rerolled.a && hasA1 ? getAugment("a1") : getAugment("a");
-  const slotB = rerolled.b && hasB1 ? getAugment("b1") : getAugment("b");
-  const slotC = rerolled.c && hasC1 ? getAugment("c1") : getAugment("c");
+  const rerolledMessage = {
+    id: "rerolled-message",
+    name: `You rerolled the augment ${q.streamerName} selected!`,
+  };
+
+  const slotA = rerolled.a
+    ? hasA1
+      ? getAugment("a1")
+      : { ...rerolledMessage, id: "ax" }
+    : getAugment("a");
+
+  const slotB = rerolled.b
+    ? hasB1
+      ? getAugment("b1")
+      : { ...rerolledMessage, id: "bx" }
+    : getAugment("b");
+
+  const slotC = rerolled.c
+    ? hasC1
+      ? getAugment("c1")
+      : { ...rerolledMessage, id: "cx" }
+    : getAugment("c");
 
   const visibleAugments = [slotA, slotB, slotC].filter(
     (x): x is NonNullable<typeof x> => Boolean(x),
@@ -113,9 +132,9 @@ export default function TrainClient() {
 
           const base = a.id[0] as "a" | "b" | "c";
           const hasReroll =
-            (base === "a" && hasA1 && !rerolled.a) ||
-            (base === "b" && hasB1 && !rerolled.b) ||
-            (base === "c" && hasC1 && !rerolled.c);
+            (base === "a" && !rerolled.a) ||
+            (base === "b" && !rerolled.b) ||
+            (base === "c" && !rerolled.c);
 
           return (
             <div
@@ -129,7 +148,7 @@ export default function TrainClient() {
             >
               <button
                 onClick={() => onChoose(a.id)}
-                disabled={!!choice}
+                disabled={!!choice || a.id.endsWith("x")}
                 className={
                   "flex flex-1 items-center justify-between px-4 py-3 text-left text-sm font-medium transition-colors " +
                   (selected
@@ -137,18 +156,35 @@ export default function TrainClient() {
                     : "bg-white text-zinc-900 hover:bg-zinc-50 disabled:opacity-60 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900")
                 }
               >
-                <span className="truncate">{a.name}</span>
+                <span className={"truncate" + (a.id.endsWith("x") ? " text-zinc-600 dark:text-zinc-300" : "")}
+                >
+                  {a.name}
+                </span>
                 <span className="ml-3 text-xs opacity-70">Pick</span>
               </button>
 
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  // Always allow reroll once per slot.
                   setRerolled((r) => ({
                     ...r,
                     [base]: true,
-                  }))
-                }
+                  }));
+
+                  // If the user rerolls the streamer-selected slot *and* there is no reroll augment
+                  // (A1/B1/C1 missing), treat it as an "answered" action so they can proceed.
+                  const top = q.topPickAugmentId;
+                  const topBase = (top?.[0] ?? "") as "a" | "b" | "c";
+                  const missingRerollForBase =
+                    (base === "a" && !hasA1) ||
+                    (base === "b" && !hasB1) ||
+                    (base === "c" && !hasC1);
+
+                  if (!choice && base === topBase && missingRerollForBase) {
+                    setChoice({ chosenAugmentId: top });
+                  }
+                }}
                 disabled={!!choice || !hasReroll}
                 className={
                   "flex w-24 items-center justify-center border-l px-3 text-xs font-medium transition-colors " +
