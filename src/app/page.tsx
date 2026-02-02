@@ -17,20 +17,39 @@ export default function Home() {
           </p>
         </header>
 
-        <section className="mt-10 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="text-sm font-semibold">MVP set</div>
-              <div className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-                10 questions · instant feedback
+        <section className="mt-10 grid gap-4">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="text-sm font-semibold">MVP set</div>
+                <div className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                  10 questions · instant feedback
+                </div>
               </div>
+              <Link
+                href="/train"
+                className="flex h-11 items-center justify-center rounded-xl bg-black px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+              >
+                Start MVP
+              </Link>
             </div>
-            <Link
-              href="/train"
-              className="flex h-11 items-center justify-center rounded-xl bg-black px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-            >
-              Start training
-            </Link>
+          </div>
+
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="text-sm font-semibold">Training set generator</div>
+                <div className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                  Pulls from your augments sheet · generates 6 choices per tier + stage
+                </div>
+              </div>
+              <Link
+                href="/train/random"
+                className="flex h-11 items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900"
+              >
+                Open generator
+              </Link>
+            </div>
           </div>
         </section>
 
