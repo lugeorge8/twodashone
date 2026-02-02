@@ -30,7 +30,8 @@ export async function readAugmentsFromSheet(params: {
   // Expect header row: Name | description | tier | stage2 | stage3 | stage4
   // We match headers case-insensitively.
   const [header, ...rows] = values;
-  const idx = (colName: string) => header.findIndex((h) => String(h).trim().toLowerCase() === colName);
+  const norm = (s: unknown) => String(s ?? '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  const idx = (colName: string) => header.findIndex((h) => norm(h) === norm(colName));
 
   const iName = idx('name');
   const iTier = idx('tier');
