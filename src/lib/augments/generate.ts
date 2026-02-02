@@ -7,11 +7,14 @@ export function pickRandomAugments(params: {
   tier: Tier;
   count: number; // e.g. 6
   stage?: 2 | 3 | 4; // optional filter: augment is available on that stage
+  excludeNames?: string[]; // optional: prevent repeats
 }): AugmentRow[] {
+  const exclude = new Set((params.excludeNames ?? []).map((s) => s.trim()).filter(Boolean));
+
   const pool = params.augments.filter((a) => {
     if (a.tier !== params.tier) return false;
+    if (exclude.has(a.name)) return false;
     if (params.stage == null) return true;
-    // If the column is missing, treat as not available; if present and truthy, include.
     return Boolean(a.stages?.[params.stage]);
   });
 

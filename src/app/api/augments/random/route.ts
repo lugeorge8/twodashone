@@ -11,6 +11,12 @@ export async function GET(req: Request) {
   const stageNum = stageParam ? Number(stageParam) : undefined;
   const stage = (stageNum === 2 || stageNum === 3 || stageNum === 4) ? stageNum : undefined;
 
+  // exclude can be repeated (?exclude=a&exclude=b) or comma-separated (?exclude=a,b)
+  const exclude = url.searchParams.getAll('exclude')
+    .flatMap((v) => String(v).split(','))
+    .map((s) => s.trim())
+    .filter(Boolean);
+
   if (!['silver', 'gold', 'prismatic'].includes(tier)) {
     return NextResponse.json({ error: 'tier must be silver|gold|prismatic' }, { status: 400 });
   }
@@ -25,7 +31,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const picked = pickRandomAugments({ augments, tier, count, stage });
+    const picked = pickRandomAugments({ augments, tier, count, stage, excludeNames: exclude });
     return NextResponse.json({ tier, count, stage: stage ?? null, augments: picked });
   } catch (e) {
     return NextResponse.json(
