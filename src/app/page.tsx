@@ -43,12 +43,20 @@ export default function Home() {
                   Pulls from your augments sheet · generates 6 choices per tier + stage
                 </div>
               </div>
-              <Link
-                href="/train/random"
-                className="flex h-11 items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900"
-              >
-                Open generator
-              </Link>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Link
+                  href="/train/random"
+                  className="flex h-11 items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900"
+                >
+                  Open generator
+                </Link>
+                <Link
+                  href="/status"
+                  className="flex h-11 items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900"
+                >
+                  Status
+                </Link>
+              </div>
             </div>
           </div>
         </section>
