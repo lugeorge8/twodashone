@@ -7,10 +7,12 @@ export async function GET(req: Request) {
   const tier = (url.searchParams.get('tier') ?? 'silver') as 'silver' | 'gold' | 'prismatic';
   const count = Number(url.searchParams.get('count') ?? '6');
   const stageParam = url.searchParams.get('stage');
-  const stage = stageParam ? Number(stageParam) : undefined;
+  const stageNum = stageParam ? Number(stageParam) : undefined;
+  const stage = (stageNum === 2 || stageNum === 3 || stageNum === 4) ? stageNum : undefined;
 
   const spreadsheetId = process.env.AUGMENTS_SHEET_ID;
-  const range = process.env.AUGMENTS_SHEET_RANGE ?? 'Augments!A:D';
+  // Default to A1:F (Name, description, tier, stage2, stage3, stage4)
+  const range = process.env.AUGMENTS_SHEET_RANGE ?? 'Augments!A1:F271';
 
   if (!spreadsheetId) {
     return NextResponse.json({ error: 'Missing AUGMENTS_SHEET_ID env var' }, { status: 500 });

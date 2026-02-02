@@ -6,12 +6,13 @@ export function pickRandomAugments(params: {
   augments: AugmentRow[];
   tier: Tier;
   count: number; // e.g. 6
-  stage?: number; // optional filter: augment.stage == stage OR augment.stage undefined
+  stage?: 2 | 3 | 4; // optional filter: augment is available on that stage
 }): AugmentRow[] {
   const pool = params.augments.filter((a) => {
     if (a.tier !== params.tier) return false;
     if (params.stage == null) return true;
-    return a.stage == null || a.stage === params.stage;
+    // If the column is missing, treat as not available; if present and truthy, include.
+    return Boolean(a.stages?.[params.stage]);
   });
 
   if (pool.length < params.count) {
