@@ -49,7 +49,15 @@ export async function readAugmentsFromSheet(params: {
     if (!name) continue;
 
     const tierRaw = String(r[iTier] ?? '').trim().toLowerCase();
-    const tier = (tierRaw === 'silver' || tierRaw === 'gold' || tierRaw === 'prismatic') ? tierRaw : null;
+    const tier = (() => {
+      if (tierRaw === '1') return 'silver' as const;
+      if (tierRaw === '2') return 'gold' as const;
+      if (tierRaw === '3') return 'prismatic' as const;
+      if (tierRaw.includes('silver')) return 'silver' as const;
+      if (tierRaw.includes('gold')) return 'gold' as const;
+      if (tierRaw.includes('prismatic') || tierRaw.includes('prism')) return 'prismatic' as const;
+      return null;
+    })();
     if (!tier) continue;
 
     const description = String(r[iDesc] ?? '').trim();
