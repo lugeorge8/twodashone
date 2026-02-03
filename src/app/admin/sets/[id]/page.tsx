@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { requireProSession } from '@/lib/auth/session';
 import { sql } from '@/lib/db';
-import { saveSpotAnswerAction } from './actions';
+import { saveSpotAnswerAction, uploadSpotScreenshotAction } from './actions';
 
 export default async function AdminSetPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await requireProSession();
@@ -83,20 +83,15 @@ export default async function AdminSetPage({ params }: { params: Promise<{ id: s
                     Spot {s.idx} · stage {s.stage} · correct: {s.correct_augment_name ?? '(unset)'}
                   </summary>
 
-                  <form action={saveSpotAnswerAction} className="mt-4 grid gap-4">
-                    <input type="hidden" name="setId" value={id} />
-                    <input type="hidden" name="idx" value={s.idx} />
+                  <div className="mt-4 grid gap-4">
+                    <form action={uploadSpotScreenshotAction} className="grid gap-2">
+                      <input type="hidden" name="setId" value={id} />
+                      <input type="hidden" name="idx" value={s.idx} />
 
-                    <label className="grid gap-1">
-                      <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                        Screenshot URL (stage 1-4)
-                      </span>
-                      <input
-                        name="screenshotUrl"
-                        defaultValue={s.screenshot_url ?? ''}
-                        className="h-11 rounded-xl border border-zinc-200 bg-white px-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
-                        placeholder="https://..."
-                      />
+                      <div className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                        Screenshot (stage 1-4)
+                      </div>
+
                       {s.screenshot_url ? (
                         <a
                           href={s.screenshot_url}
@@ -104,10 +99,47 @@ export default async function AdminSetPage({ params }: { params: Promise<{ id: s
                           rel="noreferrer"
                           className="text-xs text-zinc-600 underline dark:text-zinc-400"
                         >
-                          Open screenshot
+                          Open current screenshot
                         </a>
-                      ) : null}
-                    </label>
+                      ) : (
+                        <div className="text-xs text-zinc-500 dark:text-zinc-400">No screenshot uploaded yet.</div>
+                      )}
+
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <input
+                          name="screenshotFile"
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          className="text-sm"
+                        />
+                        <button
+                          type="submit"
+                          className="h-10 rounded-xl bg-black px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+                        >
+                          Upload
+                        </button>
+                      </div>
+
+                      <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                        Uses Vercel Blob. Files are served via unguessable URLs (not fully private).
+                      </div>
+                    </form>
+
+                    <form action={saveSpotAnswerAction} className="grid gap-4">
+                      <input type="hidden" name="setId" value={id} />
+                      <input type="hidden" name="idx" value={s.idx} />
+
+                      <label className="grid gap-1">
+                        <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                          Screenshot URL override (optional)
+                        </span>
+                        <input
+                          name="screenshotUrl"
+                          defaultValue={s.screenshot_url ?? ''}
+                          className="h-11 rounded-xl border border-zinc-200 bg-white px-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
+                          placeholder="(leave as-is)"
+                        />
+                      </label>
 
                     <div className="grid gap-2">
                       {options.length === 0 ? (
@@ -163,6 +195,7 @@ export default async function AdminSetPage({ params }: { params: Promise<{ id: s
                       </button>
                     </div>
                   </form>
+                  </div>
                 </details>
               );
             })}
