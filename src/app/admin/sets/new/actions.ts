@@ -44,6 +44,18 @@ export async function createTrainingSetAction(formData: FormData) {
 
   const gen = await generateTrainingSetSpots({ tierMode, stage: 2 });
 
+  // Pick 20 screenshots for this patch (repeats ok).
+  const shots = await sql<{ image_url: string }>`
+    select image_url from screenshots
+    where patch = ${patch} and stage = '1-4'
+    order by random()
+    limit 50
+  `;
+  if (shots.rows.length === 0) {
+    redirect('/admin/sets/new?error=no-screenshots');
+  }
+  const pickShot = (i: number) => shots.rows[i % shots.rows.length].image_url;
+
   // NOTE: On Vercel serverless, a pooled connection may not preserve a transaction
   // across multiple statements unless we hold a dedicated connection.
   // For MVP, we do best-effort inserts and cleanup on failure.
@@ -56,7 +68,7 @@ export async function createTrainingSetAction(formData: FormData) {
     for (const s of gen.spots) {
       await sql`
         insert into training_spots (set_id, idx, stage, augment_options, screenshot_url)
-        values (${id}, ${s.idx}, ${s.stage}, ${JSON.stringify(s.options)}::jsonb, ${null})
+        values (${id}, ${s.idx}, ${s.stage}, ${JSON.stringify(s.options)}::jsonb, ${pickShot(s.idx - 1)})
       `;
     }
   } catch (e) {

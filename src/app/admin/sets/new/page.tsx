@@ -31,7 +31,9 @@ export default async function NewTrainingSetPage({
 
           {sp.error && (
             <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-900 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-100">
-              Missing/invalid field: {sp.error}
+              {sp.error === 'no-screenshots'
+                ? 'No screenshots found for that patch (stage 1-4). Upload screenshots first.'
+                : `Missing/invalid field: ${sp.error}`}
             </div>
           )}
 

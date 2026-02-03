@@ -44,14 +44,22 @@ export default async function AdminHome() {
             Signed in as {session.displayName} ({session.email})
           </div>
 
-          <div className="mt-6 flex items-center justify-between">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm font-semibold">Your training sets</div>
-            <Link
-              href="/admin/sets/new"
-              className="flex h-10 items-center justify-center rounded-xl bg-black px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-            >
-              New set
-            </Link>
+            <div className="flex gap-2">
+              <Link
+                href="/admin/screenshots"
+                className="flex h-10 items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900"
+              >
+                Upload screenshots
+              </Link>
+              <Link
+                href="/admin/sets/new"
+                className="flex h-10 items-center justify-center rounded-xl bg-black px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+              >
+                New set
+              </Link>
+            </div>
           </div>
 
           {sets.rows.length === 0 ? (
