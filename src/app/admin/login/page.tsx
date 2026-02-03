@@ -8,6 +8,7 @@ export default async function AdminLoginPage({
 }) {
   const sp = await searchParams;
   const hasError = sp.error === '1';
+  const hasServerError = sp.error === 'server';
 
   return (
     <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 dark:bg-black dark:text-zinc-50">
@@ -31,6 +32,12 @@ export default async function AdminLoginPage({
           {hasError && (
             <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-900 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-100">
               Invalid email or password.
+            </div>
+          )}
+
+          {hasServerError && (
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-900 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-100">
+              Server error while logging in. Check Vercel runtime logs.
             </div>
           )}
 
