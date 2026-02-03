@@ -16,6 +16,7 @@ async function assertSetOwnership(proId: string, setId: string) {
   }
 }
 
+// (deprecated) kept for backward compatibility while switching to per-spot pages
 export async function uploadSpotScreenshotAction(formData: FormData) {
   const session = await requireProSession();
 
@@ -62,6 +63,7 @@ export async function uploadSpotScreenshotAction(formData: FormData) {
   redirect(`/admin/sets/${encodeURIComponent(setId)}#spot-${idx}`);
 }
 
+// (deprecated) kept for backward compatibility while switching to per-spot pages
 export async function saveSpotAnswerAction(formData: FormData) {
   const session = await requireProSession();
 
