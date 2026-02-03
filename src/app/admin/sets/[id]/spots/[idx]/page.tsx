@@ -1,11 +1,8 @@
 import Link from 'next/link';
 import { requireProSession } from '@/lib/auth/session';
 import { sql } from '@/lib/db';
-import {
-  generateSpotAugmentsAction,
-  saveSpotAnswerAction,
-  uploadSpotScreenshotAction,
-} from './spot-actions';
+import { generateSpotAugmentsAction, saveSpotAnswerAction, uploadSpotScreenshotAction } from './spot-actions';
+import AugmentActionClient from './augment-action-client';
 
 type Opt = {
   id?: 'a' | 'b' | 'c' | 'a1' | 'b1' | 'c1';
@@ -29,32 +26,16 @@ function normalizeOptions(raw: unknown): Array<Required<Pick<Opt, 'id' | 'name' 
   });
 }
 
-function labelForPickId(id: string) {
-  if (id === 'a' || id === 'b' || id === 'c') return id.toUpperCase();
-  if (id === 'a1') return 'A (after reroll)';
-  if (id === 'b1') return 'B (after reroll)';
-  if (id === 'c1') return 'C (after reroll)';
-  return id;
-}
-
-export default async function AdminSpotPage({
-  params,
-}: {
-  params: Promise<{ id: string; idx: string }>;
-}) {
+export default async function AdminSpotPage({ params }: { params: Promise<{ id: string; idx: string }> }) {
   const session = await requireProSession();
   const { id: setId, idx } = await params;
   const spotIdx = Number(idx);
+
   if (!Number.isFinite(spotIdx) || spotIdx < 1 || spotIdx > 20) {
     return <div className="min-h-screen bg-zinc-50 p-10">Invalid spot.</div>;
   }
 
-  const setRes = await sql<{
-    id: string;
-    patch: string;
-    tier_mode: string;
-    status: string;
-  }>`
+  const setRes = await sql<{ id: string; patch: string; tier_mode: string; status: string }>`
     select id, patch, tier_mode, status
     from training_sets
     where id = ${setId} and pro_id = ${session.proId!}
@@ -81,9 +62,6 @@ export default async function AdminSpotPage({
   if (!spot) return <div className="min-h-screen bg-zinc-50 p-10">Spot not found.</div>;
 
   const options = normalizeOptions(spot.augment_options);
-  const visible = options.filter((o) => o.id === 'a' || o.id === 'b' || o.id === 'c');
-  const hidden = options.filter((o) => o.id === 'a1' || o.id === 'b1' || o.id === 'c1');
-
   const nextIdx = spotIdx < 20 ? spotIdx + 1 : null;
 
   return (
@@ -96,9 +74,7 @@ export default async function AdminSpotPage({
           >
             ← Set
           </Link>
-          <div className="text-sm text-zinc-500 dark:text-zinc-400">
-            Spot {spotIdx} / 20
-          </div>
+          <div className="text-sm text-zinc-500 dark:text-zinc-400">Spot {spotIdx} / 20</div>
         </header>
 
         <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
@@ -124,7 +100,7 @@ export default async function AdminSpotPage({
             <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">No screenshot uploaded yet.</div>
           )}
 
-          <form action={uploadSpotScreenshotAction} className="mt-4 grid gap-3">
+          <form action={uploadSpotScreenshotAction} encType="multipart/form-data" className="mt-4 grid gap-3">
             <input type="hidden" name="setId" value={setId} />
             <input type="hidden" name="idx" value={spotIdx} />
 
@@ -170,55 +146,7 @@ export default async function AdminSpotPage({
             <input type="hidden" name="setId" value={setId} />
             <input type="hidden" name="idx" value={spotIdx} />
 
-            <div className="grid gap-2">
-              <div className="text-xs text-zinc-500 dark:text-zinc-400">Visible (A/B/C)</div>
-              {visible.map((o) => (
-                <label
-                  key={o.id + o.name}
-                  className="flex gap-3 rounded-xl border border-zinc-200 bg-white p-3 text-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900"
-                >
-                  <input
-                    type="radio"
-                    name="correctPickRaw"
-                    value={`${o.id}::${o.name}`}
-                    defaultChecked={spot.correct_pick_id === o.id}
-                    disabled={!spot.screenshot_url}
-                  />
-                  <div className="min-w-0">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="font-semibold">{labelForPickId(o.id)} · {o.name}</div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400">{o.tier}</div>
-                    </div>
-                    <div className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">{o.description}</div>
-                  </div>
-                </label>
-              ))}
-            </div>
-
-            <div className="grid gap-2">
-              <div className="text-xs text-zinc-500 dark:text-zinc-400">Hidden (after reroll)</div>
-              {hidden.map((o) => (
-                <label
-                  key={o.id + o.name}
-                  className="flex gap-3 rounded-xl border border-zinc-200 bg-white p-3 text-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900"
-                >
-                  <input
-                    type="radio"
-                    name="correctPickRaw"
-                    value={`${o.id}::${o.name}`}
-                    defaultChecked={spot.correct_pick_id === o.id}
-                    disabled={!spot.screenshot_url}
-                  />
-                  <div className="min-w-0">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="font-semibold">{labelForPickId(o.id)} · {o.name}</div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400">{o.tier}</div>
-                    </div>
-                    <div className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">{o.description}</div>
-                  </div>
-                </label>
-              ))}
-            </div>
+            <AugmentActionClient options={options as any} defaultCorrectPickId={spot.correct_pick_id} disabled={!spot.screenshot_url} />
 
             <label className="grid gap-1">
               <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
