@@ -23,7 +23,12 @@ export async function loginAction(formData: FormData) {
 
     redirect('/admin');
   } catch (e) {
-    // Ensure the underlying error appears in Vercel runtime logs.
+    // next/navigation redirect() throws NEXT_REDIRECT. That's not an error.
+    const msg = e instanceof Error ? e.message : '';
+    const digest = (e && typeof e === 'object' && 'digest' in e) ? (e as any).digest : undefined;
+    const isRedirect = msg === 'NEXT_REDIRECT' || (typeof digest === 'string' && digest.startsWith('NEXT_REDIRECT'));
+    if (isRedirect) throw e;
+
     console.error('loginAction failed', { email, error: e });
     redirect('/admin/login?error=server');
   }
