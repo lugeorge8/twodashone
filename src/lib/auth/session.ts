@@ -24,7 +24,9 @@ export async function getSession(): Promise<IronSession<ProSession>> {
 export async function requireProSession() {
   const session = await getSession();
   if (!session.isLoggedIn || !session.proId) {
-    throw new Error('UNAUTHENTICATED');
+    // Throwing causes a generic 500 on Vercel; redirect is nicer.
+    const { redirect } = await import('next/navigation');
+    redirect('/admin/login');
   }
   return session;
 }

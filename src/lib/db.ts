@@ -12,13 +12,16 @@ let clientPromise: Promise<ReturnType<typeof createClient>> | null = null;
 
 async function getClient() {
   if (!clientPromise) {
-    const connectionString =
-      process.env.POSTGRES_URL_NON_POOLING ||
-      process.env.POSTGRES_URL ||
-      process.env.POSTGRES_PRISMA_URL;
+    const connectionString = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
 
     if (!connectionString) {
-      throw new Error('Missing POSTGRES_URL env var(s)');
+      throw new Error('Missing POSTGRES_URL_NON_POOLING (or POSTGRES_URL) env var');
+    }
+
+    // If POSTGRES_URL points at a pooler (common), createClient will fail.
+    // Prefer POSTGRES_URL_NON_POOLING on Vercel.
+    if (!process.env.POSTGRES_URL_NON_POOLING && /pooler|prisma\+postgres|accelerate\.prisma-data\.net/i.test(connectionString)) {
+      throw new Error('Invalid DB connection string for createClient(). Set POSTGRES_URL_NON_POOLING on Vercel.');
     }
 
     const client = createClient({ connectionString });
