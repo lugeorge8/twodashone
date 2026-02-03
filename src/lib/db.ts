@@ -51,24 +51,33 @@ async function getRunner(): Promise<Runner> {
     return runnerPromise;
   }
 
-  // Otherwise use pooled URL.
+  // Otherwise use POSTGRES_URL. It might be pooled or direct depending on provider settings.
   if (!pooled) {
-    throw new Error('POSTGRES_URL_NON_POOLING not set and POSTGRES_URL missing.');
+    throw new Error('POSTGRES_URL (or POSTGRES_URL_NON_POOLING) is missing');
   }
 
-  if (!looksPooled(pooled)) {
-    // Vercel sometimes provides direct URLs too; but createPool will reject them.
-    // In that case, you must set POSTGRES_URL_NON_POOLING.
-    throw new Error('POSTGRES_URL looks like a direct URL. Set POSTGRES_URL_NON_POOLING for direct connections.');
+  if (looksPooled(pooled)) {
+    const pool = createPool({ connectionString: pooled });
+    runnerPromise = Promise.resolve({
+      query: async (text, params) => {
+        const res = await pool.query(text, params);
+        return { rows: res.rows };
+      },
+    });
+    return runnerPromise;
   }
 
-  const pool = createPool({ connectionString: pooled });
-  runnerPromise = Promise.resolve({
-    query: async (text, params) => {
-      const res = await pool.query(text, params);
-      return { rows: res.rows };
-    },
-  });
+  // POSTGRES_URL is a direct URL. Fall back to a direct client.
+  const client = createClient({ connectionString: pooled });
+  runnerPromise = (async () => {
+    await client.connect();
+    return {
+      query: async (text, params) => {
+        const res = await client.query(text, params);
+        return { rows: res.rows };
+      },
+    };
+  })();
   return runnerPromise;
 }
 
