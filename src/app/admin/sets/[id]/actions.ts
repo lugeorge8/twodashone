@@ -11,6 +11,7 @@ export async function saveSpotAnswerAction(formData: FormData) {
   const idx = Number(formData.get('idx') ?? '0');
   const correctAugmentName = String(formData.get('correctAugmentName') ?? '').trim();
   const note = String(formData.get('correctAugmentNote') ?? '').trim();
+  const screenshotUrl = String(formData.get('screenshotUrl') ?? '').trim();
 
   if (!setId || !Number.isFinite(idx) || idx < 1 || idx > 20) {
     redirect(`/admin/sets/${encodeURIComponent(setId)}?error=bad-spot`);
@@ -30,7 +31,8 @@ export async function saveSpotAnswerAction(formData: FormData) {
   await sql`
     update training_spots
     set correct_augment_name = ${correctAugmentName || null},
-        correct_augment_note = ${note || null}
+        correct_augment_note = ${note || null},
+        screenshot_url = ${screenshotUrl || null}
     where set_id = ${setId} and idx = ${idx}
   `;
 

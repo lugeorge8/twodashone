@@ -87,6 +87,28 @@ export default async function AdminSetPage({ params }: { params: Promise<{ id: s
                     <input type="hidden" name="setId" value={id} />
                     <input type="hidden" name="idx" value={s.idx} />
 
+                    <label className="grid gap-1">
+                      <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                        Screenshot URL (stage 1-4)
+                      </span>
+                      <input
+                        name="screenshotUrl"
+                        defaultValue={s.screenshot_url ?? ''}
+                        className="h-11 rounded-xl border border-zinc-200 bg-white px-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
+                        placeholder="https://..."
+                      />
+                      {s.screenshot_url ? (
+                        <a
+                          href={s.screenshot_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs text-zinc-600 underline dark:text-zinc-400"
+                        >
+                          Open screenshot
+                        </a>
+                      ) : null}
+                    </label>
+
                     <div className="grid gap-2">
                       {options.length === 0 ? (
                         <div className="text-sm text-zinc-600 dark:text-zinc-400">No augment options found.</div>

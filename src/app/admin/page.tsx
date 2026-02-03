@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { requireProSession } from '@/lib/auth/session';
 import { sql } from '@/lib/db';
 import { logoutAction } from './login/actions';
+import { deleteTrainingSetAction } from './actions';
 
 export default async function AdminHome() {
   const session = await requireProSession();
@@ -53,27 +54,68 @@ export default async function AdminHome() {
             </Link>
           </div>
 
-          <div className="mt-4 grid gap-2">
-            {sets.rows.length === 0 ? (
-              <div className="text-sm text-zinc-600 dark:text-zinc-400">No sets yet.</div>
-            ) : (
-              sets.rows.map((s) => (
-                <Link
+          {sets.rows.length === 0 ? (
+            <div className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">No sets yet.</div>
+          ) : (
+            (() => {
+              const published = sets.rows.filter((s) => s.status === 'published');
+              const inProgress = sets.rows.filter((s) => s.status !== 'published');
+
+              const SetRow = (s: (typeof sets.rows)[number]) => (
+                <div
                   key={s.id}
-                  href={`/admin/sets/${encodeURIComponent(s.id)}`}
-                  className="rounded-xl border border-zinc-200 bg-white p-4 text-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900"
+                  className="flex items-start justify-between gap-3 rounded-xl border border-zinc-200 bg-white p-4 text-sm dark:border-zinc-800 dark:bg-zinc-950"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="font-semibold">{s.id}</div>
-                    <div className="text-xs text-zinc-500 dark:text-zinc-400">{s.status}</div>
+                  <Link
+                    href={`/admin/sets/${encodeURIComponent(s.id)}`}
+                    className="min-w-0 flex-1 hover:underline"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="truncate font-semibold">{s.id}</div>
+                      <div className="text-xs text-zinc-500 dark:text-zinc-400">{s.status}</div>
+                    </div>
+                    <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                      patch {s.patch} · {s.tier_mode} · {new Date(s.created_at).toLocaleString()}
+                    </div>
+                  </Link>
+
+                  <form action={deleteTrainingSetAction}>
+                    <input type="hidden" name="setId" value={s.id} />
+                    <button
+                      type="submit"
+                      className="rounded-lg border border-zinc-200 px-2 py-1 text-xs text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                    >
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              );
+
+              return (
+                <div className="mt-4 grid gap-6">
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+                      In progress
+                    </div>
+                    <div className="mt-2 grid gap-2">{inProgress.map(SetRow)}</div>
                   </div>
-                  <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                    patch {s.patch} · {s.tier_mode} · {new Date(s.created_at).toLocaleString()}
+
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+                      Published
+                    </div>
+                    <div className="mt-2 grid gap-2">
+                      {published.length === 0 ? (
+                        <div className="text-sm text-zinc-600 dark:text-zinc-400">No published sets yet.</div>
+                      ) : (
+                        published.map(SetRow)
+                      )}
+                    </div>
                   </div>
-                </Link>
-              ))
-            )}
-          </div>
+                </div>
+              );
+            })()
+          )}
         </section>
       </main>
     </div>
