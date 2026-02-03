@@ -14,7 +14,16 @@ type Runner = {
 let runnerPromise: Promise<Runner> | null = null;
 
 function isPrismaAccelerate(cs: string) {
-  return /^prisma\+postgres:/.test(cs) || /accelerate\.prisma-data\.net/i.test(cs);
+  return (
+    /^prisma\+postgres:/.test(cs) ||
+    /^prisma:/.test(cs) ||
+    /accelerate\.prisma-data\.net/i.test(cs) ||
+    /db\.prisma\.io/i.test(cs)
+  );
+}
+
+function isPostgresUrl(cs: string) {
+  return /^postgres(ql)?:\/\//i.test(cs);
 }
 
 function looksPooled(cs: string) {
@@ -33,7 +42,11 @@ async function getRunner(): Promise<Runner> {
   }
 
   if (isPrismaAccelerate(connectionString)) {
-    throw new Error('Prisma Accelerate URL detected. Use Vercel Postgres (Neon) POSTGRES_URL env vars instead.');
+    throw new Error('Prisma/Accelerate connection detected (db.prisma.io). Set POSTGRES_URL to the Vercel Postgres URL (starts with postgres://), not the Prisma database URL.');
+  }
+
+  if (!isPostgresUrl(connectionString)) {
+    throw new Error('Invalid POSTGRES_URL: must start with postgres:// (or postgresql://).');
   }
 
   // Prefer non-pooling direct connection if present.
