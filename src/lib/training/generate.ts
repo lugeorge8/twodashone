@@ -7,7 +7,7 @@ export type TierMode = 'mixed' | 'silver' | 'gold' | 'prismatic';
 export type TrainingSpotDraft = {
   idx: number; // 1..20
   stage: '1-4';
-  options: Array<{ name: string; tier: Tier; description: string }>;
+  options: Array<{ id: 'a' | 'b' | 'c' | 'a1' | 'b1' | 'c1'; name: string; tier: Tier; description: string }>;
 };
 
 export async function generateTrainingSetSpots(params: {
@@ -32,8 +32,15 @@ export async function generateTrainingSetSpots(params: {
   const spots: TrainingSpotDraft[] = [];
   for (let i = 1; i <= 20; i++) {
     const tier = tierForIdx(i);
-    const options = pickRandomAugments({ augments, tier, count: 6, stage });
-    spots.push({ idx: i, stage: '1-4', options: options.map(({ name, tier, description }) => ({ name, tier, description })) });
+    const picked6 = pickRandomAugments({ augments, tier, count: 6, stage });
+    const ids = ['a', 'b', 'c', 'a1', 'b1', 'c1'] as const;
+    const options = picked6.map((o, j) => ({
+      id: ids[j],
+      name: o.name,
+      tier: o.tier,
+      description: o.description,
+    }));
+    spots.push({ idx: i, stage: '1-4', options });
   }
 
   return { spots, sourceStatus: status };

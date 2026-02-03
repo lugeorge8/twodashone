@@ -67,7 +67,8 @@ export async function saveSpotAnswerAction(formData: FormData) {
 
   const setId = String(formData.get('setId') ?? '').trim();
   const idx = Number(formData.get('idx') ?? '0');
-  const correctAugmentName = String(formData.get('correctAugmentName') ?? '').trim();
+  const correctPickRaw = String(formData.get('correctPickRaw') ?? '').trim();
+  const [correctPickId, correctAugmentName] = correctPickRaw.split('::');
   const note = String(formData.get('correctAugmentNote') ?? '').trim();
   const screenshotUrl = String(formData.get('screenshotUrl') ?? '').trim();
 
@@ -77,9 +78,13 @@ export async function saveSpotAnswerAction(formData: FormData) {
 
   await assertSetOwnership(session.proId!, setId);
 
+  const actionType = correctPickId?.endsWith('1') ? 'reroll_then_pick' : 'pick';
+
   await sql`
     update training_spots
-    set correct_augment_name = ${correctAugmentName || null},
+    set correct_pick_id = ${correctPickId || null},
+        correct_action_type = ${correctPickId ? actionType : null},
+        correct_augment_name = ${correctAugmentName || null},
         correct_augment_note = ${note || null},
         screenshot_url = ${screenshotUrl || null}
     where set_id = ${setId} and idx = ${idx}

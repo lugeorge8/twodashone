@@ -55,8 +55,8 @@ export async function createTrainingSetAction(formData: FormData) {
 
     for (const s of gen.spots) {
       await sql`
-        insert into training_spots (set_id, idx, stage, augment_options)
-        values (${id}, ${s.idx}, ${s.stage}, ${JSON.stringify(s.options)}::jsonb)
+        insert into training_spots (set_id, idx, stage, augment_options, screenshot_url)
+        values (${id}, ${s.idx}, ${s.stage}, ${JSON.stringify(s.options)}::jsonb, ${null})
       `;
     }
   } catch (e) {
