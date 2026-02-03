@@ -44,7 +44,9 @@ export async function createTrainingSetAction(formData: FormData) {
 
   const gen = await generateTrainingSetSpots({ tierMode, stage: 2 });
 
-  await sql`begin`;
+  // NOTE: On Vercel serverless, a pooled connection may not preserve a transaction
+  // across multiple statements unless we hold a dedicated connection.
+  // For MVP, we do best-effort inserts and cleanup on failure.
   try {
     await sql`
       insert into training_sets (id, patch, pro_id, tier_mode, status)
@@ -57,10 +59,9 @@ export async function createTrainingSetAction(formData: FormData) {
         values (${id}, ${s.idx}, ${s.stage}, ${JSON.stringify(s.options)}::jsonb)
       `;
     }
-
-    await sql`commit`;
   } catch (e) {
-    await sql`rollback`;
+    // Cleanup partial data
+    await sql`delete from training_sets where id = ${id}`;
     throw e;
   }
 

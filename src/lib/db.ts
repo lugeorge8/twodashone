@@ -1,51 +1,75 @@
-import { createClient } from '@vercel/postgres';
+import { createClient, createPool } from '@vercel/postgres';
 
-// Vercel Postgres (Neon) can provide either pooled or direct connection strings.
-// The `sql` tagged template from @vercel/postgres requires a *pooled* string.
-// To be robust (and to support multi-statement transactions), we implement our own
-// sql tag on top of a direct pg Client.
-//
-// IMPORTANT: This is a minimal MVP implementation. It uses a single shared client
-// and a simple mutex to avoid concurrent transactions stepping on each other.
+// Robust DB adapter for Vercel Postgres env vars.
+// - If POSTGRES_URL is pooled (recommended on Vercel serverless), we use a Pool.
+// - If POSTGRES_URL_NON_POOLING is available, we use a direct Client.
+// - We explicitly reject Prisma Accelerate connection strings.
 
-let clientPromise: Promise<ReturnType<typeof createClient>> | null = null;
+type QueryResult<T> = { rows: T[] };
 
-async function getClient() {
-  if (!clientPromise) {
-    const connectionString = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
+type Runner = {
+  query: <T = any>(text: string, params?: any[]) => Promise<QueryResult<T>>;
+};
 
-    if (!connectionString) {
-      throw new Error('Missing POSTGRES_URL_NON_POOLING (or POSTGRES_URL) env var');
-    }
+let runnerPromise: Promise<Runner> | null = null;
 
-    // If POSTGRES_URL points at a pooler (common), createClient will fail.
-    // Prefer POSTGRES_URL_NON_POOLING on Vercel.
-    if (!process.env.POSTGRES_URL_NON_POOLING && /pooler|prisma\+postgres|accelerate\.prisma-data\.net/i.test(connectionString)) {
-      throw new Error('Invalid DB connection string for createClient(). Set POSTGRES_URL_NON_POOLING on Vercel.');
-    }
-
-    const client = createClient({ connectionString });
-    clientPromise = (async () => {
-      await client.connect();
-      return client;
-    })();
-  }
-  return clientPromise;
+function isPrismaAccelerate(cs: string) {
+  return /^prisma\+postgres:/.test(cs) || /accelerate\.prisma-data\.net/i.test(cs);
 }
 
-// Simple mutex so BEGIN/COMMIT blocks don't interleave across requests.
-let lock: Promise<void> = Promise.resolve();
-async function withLock<T>(fn: () => Promise<T>): Promise<T> {
-  let release!: () => void;
-  const next = new Promise<void>((r) => (release = r));
-  const prev = lock;
-  lock = prev.then(() => next);
-  await prev;
-  try {
-    return await fn();
-  } finally {
-    release();
+function looksPooled(cs: string) {
+  return /pooler/i.test(cs);
+}
+
+async function getRunner(): Promise<Runner> {
+  if (runnerPromise) return runnerPromise;
+
+  const nonPooling = process.env.POSTGRES_URL_NON_POOLING;
+  const pooled = process.env.POSTGRES_URL;
+
+  const connectionString = nonPooling || pooled;
+  if (!connectionString) {
+    throw new Error('Missing POSTGRES_URL (and POSTGRES_URL_NON_POOLING)');
   }
+
+  if (isPrismaAccelerate(connectionString)) {
+    throw new Error('Prisma Accelerate URL detected. Use Vercel Postgres (Neon) POSTGRES_URL env vars instead.');
+  }
+
+  // Prefer non-pooling direct connection if present.
+  if (nonPooling) {
+    const client = createClient({ connectionString: nonPooling });
+    runnerPromise = (async () => {
+      await client.connect();
+      return {
+        query: async (text, params) => {
+          const res = await client.query(text, params);
+          return { rows: res.rows };
+        },
+      };
+    })();
+    return runnerPromise;
+  }
+
+  // Otherwise use pooled URL.
+  if (!pooled) {
+    throw new Error('POSTGRES_URL_NON_POOLING not set and POSTGRES_URL missing.');
+  }
+
+  if (!looksPooled(pooled)) {
+    // Vercel sometimes provides direct URLs too; but createPool will reject them.
+    // In that case, you must set POSTGRES_URL_NON_POOLING.
+    throw new Error('POSTGRES_URL looks like a direct URL. Set POSTGRES_URL_NON_POOLING for direct connections.');
+  }
+
+  const pool = createPool({ connectionString: pooled });
+  runnerPromise = Promise.resolve({
+    query: async (text, params) => {
+      const res = await pool.query(text, params);
+      return { rows: res.rows };
+    },
+  });
+  return runnerPromise;
 }
 
 function buildQuery(strings: TemplateStringsArray, values: unknown[]) {
@@ -61,16 +85,11 @@ function buildQuery(strings: TemplateStringsArray, values: unknown[]) {
   return { text, params };
 }
 
-export type SqlResult<T> = { rows: T[] };
-
 export async function sql<T = any>(
   strings: TemplateStringsArray,
   ...values: unknown[]
-): Promise<SqlResult<T>> {
-  return withLock(async () => {
-    const client = await getClient();
-    const { text, params } = buildQuery(strings, values);
-    const res = await client.query(text, params);
-    return { rows: res.rows as T[] };
-  });
+): Promise<QueryResult<T>> {
+  const runner = await getRunner();
+  const { text, params } = buildQuery(strings, values);
+  return runner.query<T>(text, params as any[]);
 }
