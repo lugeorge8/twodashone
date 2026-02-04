@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { requireProSession } from '@/lib/auth/session';
 import { sql } from '@/lib/db';
-import { uploadScreenshotAction } from './actions';
+import UploadForm from './upload-form';
 
 export default async function AdminScreenshotsPage({
   searchParams,
@@ -49,38 +49,7 @@ export default async function AdminScreenshotsPage({
             </div>
           ) : null}
 
-          <form action={uploadScreenshotAction} encType="multipart/form-data" className="mt-6 grid gap-4">
-            <label className="grid gap-1">
-              <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Patch</span>
-              <input
-                name="patch"
-                placeholder="16.03b"
-                required
-                className="h-11 rounded-xl border border-zinc-200 bg-white px-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
-              />
-            </label>
-
-            <label className="grid gap-1">
-              <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Stage</span>
-              <input
-                name="stage"
-                defaultValue="1-4"
-                className="h-11 rounded-xl border border-zinc-200 bg-white px-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
-              />
-            </label>
-
-            <label className="grid gap-1">
-              <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Image</span>
-              <input name="file" type="file" accept="image/png,image/jpeg,image/webp" className="text-sm" required />
-            </label>
-
-            <button
-              type="submit"
-              className="h-11 rounded-xl bg-black px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-            >
-              Upload
-            </button>
-          </form>
+          <UploadForm />
         </section>
 
         <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
