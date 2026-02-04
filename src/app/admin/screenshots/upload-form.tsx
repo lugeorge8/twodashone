@@ -43,12 +43,28 @@ export default function UploadForm() {
       </label>
 
       <label className="grid gap-1">
-        <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Stage</span>
+        <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Mode</span>
+        <select
+          name="mode"
+          defaultValue="augment_2_1"
+          className="h-11 rounded-xl border border-zinc-200 bg-white px-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          <option value="augment_2_1">Augments (2-1)</option>
+          <option value="augment_3_2">Augments (3-2)</option>
+          <option value="augment_4_2">Augments (4-2)</option>
+        </select>
+      </label>
+
+      <label className="grid gap-1">
+        <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Stage label</span>
         <input
           name="stage"
           defaultValue="1-4"
           className="h-11 rounded-xl border border-zinc-200 bg-white px-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
         />
+        <div className="text-xs text-zinc-500 dark:text-zinc-400">
+          Freeform label for the screenshot (e.g. 1-4, 3-1 board, etc.).
+        </div>
       </label>
 
       <label className="grid gap-1">

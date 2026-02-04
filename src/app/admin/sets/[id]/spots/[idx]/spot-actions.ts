@@ -77,7 +77,7 @@ export async function generateSpotAugmentsAction(formData: FormData) {
   }
 
   // Generate a single spot worth of options using the same logic (tier_mode + stage2)
-  const gen = await generateTrainingSetSpots({ tierMode: owner.tier_mode, stage: 2 });
+  const gen = await generateTrainingSetSpots({ tierMode: owner.tier_mode, stage: 2, stageLabel: '2-1' });
   const options = gen.spots[0].options; // use first generated spot
 
   await sql`

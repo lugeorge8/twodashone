@@ -5,6 +5,8 @@ import { requireProSession } from '@/lib/auth/session';
 import { sql } from '@/lib/db';
 import { formatTrainingSetId } from '@/lib/training/ids';
 import { generateTrainingSetSpots, type TierMode } from '@/lib/training/generate';
+import type { TrainingMode } from '@/lib/training/modes';
+import { modeToAugmentStage, modeToStageLabel } from '@/lib/training/modes';
 
 function slugifyPro(displayName: string) {
   // Keep it simple: remove spaces/punct.
@@ -16,6 +18,7 @@ export async function createTrainingSetAction(formData: FormData) {
 
   const patch = String(formData.get('patch') ?? '').trim();
   const tierMode = String(formData.get('tierMode') ?? 'mixed').trim() as TierMode;
+  const mode = String(formData.get('mode') ?? 'augment_2_1').trim() as TrainingMode;
 
   if (!patch) {
     redirect('/admin/sets/new?error=patch');
@@ -23,6 +26,10 @@ export async function createTrainingSetAction(formData: FormData) {
 
   if (!['mixed', 'silver', 'gold', 'prismatic'].includes(tierMode)) {
     redirect('/admin/sets/new?error=tier');
+  }
+
+  if (!['augment_2_1', 'augment_3_2', 'augment_4_2'].includes(mode)) {
+    redirect('/admin/sets/new?error=mode');
   }
 
   // Find next seq for this pro+patch
@@ -42,12 +49,15 @@ export async function createTrainingSetAction(formData: FormData) {
 
   const id = formatTrainingSetId({ proSlug: slugifyPro(session.displayName ?? 'Pro'), patch, seq: nextSeq });
 
-  const gen = await generateTrainingSetSpots({ tierMode, stage: 2 });
+  const augStage = modeToAugmentStage(mode);
+  const stageLabel = modeToStageLabel(mode);
+
+  const gen = await generateTrainingSetSpots({ tierMode, stage: augStage, stageLabel });
 
   // Pick 20 screenshots for this patch (repeats ok).
   const shots = await sql<{ image_url: string }>`
     select image_url from screenshots
-    where patch = ${patch} and stage = '1-4'
+    where patch = ${patch} and mode = ${mode}
     order by random()
     limit 50
   `;
@@ -61,8 +71,8 @@ export async function createTrainingSetAction(formData: FormData) {
   // For MVP, we do best-effort inserts and cleanup on failure.
   try {
     await sql`
-      insert into training_sets (id, patch, pro_id, tier_mode, status)
-      values (${id}, ${patch}, ${session.proId!}, ${tierMode}, 'draft')
+      insert into training_sets (id, patch, pro_id, tier_mode, status, mode)
+      values (${id}, ${patch}, ${session.proId!}, ${tierMode}, 'draft', ${mode})
     `;
 
     for (const s of gen.spots) {

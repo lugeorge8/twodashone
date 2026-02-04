@@ -11,6 +11,7 @@ export async function uploadScreenshotsAction(formData: FormData) {
 
   const patch = String(formData.get('patch') ?? '').trim();
   const stage = String(formData.get('stage') ?? '1-4').trim() || '1-4';
+  const mode = String(formData.get('mode') ?? 'augment_2_1').trim();
   const files = formData.getAll('files');
 
   if (!patch) {
@@ -40,8 +41,8 @@ export async function uploadScreenshotsAction(formData: FormData) {
     const blob = await put(pathname, file, { access: 'public', addRandomSuffix: true });
 
     await sql`
-      insert into screenshots (patch, stage, image_url)
-      values (${patch}, ${stage}, ${blob.url})
+      insert into screenshots (patch, stage, mode, image_url)
+      values (${patch}, ${stage}, ${mode}, ${blob.url})
     `;
   }
 

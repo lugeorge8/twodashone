@@ -6,18 +6,19 @@ export type TierMode = 'mixed' | 'silver' | 'gold' | 'prismatic';
 
 export type TrainingSpotDraft = {
   idx: number; // 1..20
-  stage: '1-4';
+  stage: string; // e.g. '2-1' | '3-2' | '4-2'
   options: Array<{ id: 'a' | 'b' | 'c' | 'a1' | 'b1' | 'c1'; name: string; tier: Tier; description: string }>;
 };
 
 export async function generateTrainingSetSpots(params: {
   tierMode: TierMode;
-  stage?: 2 | 3 | 4; // which augment stage to filter against; default 2
+  stage: 2 | 3 | 4; // which augment stage to filter against
+  stageLabel: string; // e.g. '2-1'|'3-2'|'4-2'
 }) {
   const { augments, status } = await getAugmentsFromConfiguredSource();
   if (!status.ok) throw new Error(status.error ?? 'Augments source not configured');
 
-  const stage = params.stage ?? 2;
+  const stage = params.stage;
 
   const tiers: Tier[] = params.tierMode === 'mixed'
     ? ['silver', 'gold', 'prismatic']
@@ -40,7 +41,7 @@ export async function generateTrainingSetSpots(params: {
       tier: o.tier,
       description: o.description,
     }));
-    spots.push({ idx: i, stage: '1-4', options });
+    spots.push({ idx: i, stage: params.stageLabel as any, options });
   }
 
   return { spots, sourceStatus: status };
