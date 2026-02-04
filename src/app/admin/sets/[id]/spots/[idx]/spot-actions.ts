@@ -86,7 +86,8 @@ export async function generateSpotAugmentsAction(formData: FormData) {
     where set_id = ${setId} and idx = ${idx}
   `;
 
-  redirect(`/admin/sets/${encodeURIComponent(setId)}/spots/${idx}`);
+  const nextIdx = idx < 20 ? idx + 1 : idx;
+  redirect(`/admin/sets/${encodeURIComponent(setId)}/spots/${nextIdx}`);
 }
 
 export async function saveSpotAnswerAction(formData: FormData) {

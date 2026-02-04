@@ -88,18 +88,21 @@ export default async function AdminSpotPage({ params }: { params: Promise<{ id: 
           <h2 className="text-sm font-semibold">Screenshot (stage 1-4)</h2>
 
           {spot.screenshot_url ? (
-            <a
-              href={spot.screenshot_url}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-2 inline-block text-sm underline text-zinc-700 dark:text-zinc-300"
-            >
-              Open current screenshot
-            </a>
+            <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+              {/* Use plain img to avoid Next Image remotePatterns config. */}
+              <img src={spot.screenshot_url} alt={`Spot ${spotIdx} screenshot`} className="h-auto w-full" />
+              <div className="flex items-center justify-between px-3 py-2 text-xs text-zinc-500 dark:text-zinc-400">
+                <span>Preview</span>
+                <a className="underline" href={spot.screenshot_url} target="_blank" rel="noreferrer">
+                  Open
+                </a>
+              </div>
+            </div>
           ) : (
             <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">No screenshot uploaded yet.</div>
           )}
 
+          {/* Upload is kept for now; later we’ll remove once all screenshots come from the library. */}
           <form action={uploadSpotScreenshotAction} encType="multipart/form-data" className="mt-4 grid gap-3">
             <input type="hidden" name="setId" value={setId} />
             <input type="hidden" name="idx" value={spotIdx} />
