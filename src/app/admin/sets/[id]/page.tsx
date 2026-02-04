@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { requireProSession } from '@/lib/auth/session';
 import { sql } from '@/lib/db';
+import { publishSetAction, unpublishSetAction } from './set-actions';
 
 export default async function AdminSetPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await requireProSession();
@@ -61,14 +62,42 @@ export default async function AdminSetPage({ params }: { params: Promise<{ id: s
             <div>Answers: {c?.with_answer ?? 0} / {c?.total ?? 20}</div>
           </div>
 
-          <div className="mt-6 flex items-center justify-between">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm font-semibold">Edit spots</div>
-            <Link
-              href={`/admin/sets/${encodeURIComponent(id)}/spots/1`}
-              className="flex h-10 items-center justify-center rounded-xl bg-black px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-            >
-              Start spot 1 →
-            </Link>
+            <div className="flex gap-2">
+              <Link
+                href={`/admin/sets/${encodeURIComponent(id)}/spots/1`}
+                className="flex h-10 items-center justify-center rounded-xl bg-black px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+              >
+                Start spot 1 →
+              </Link>
+
+              {set.status === 'published' ? (
+                <form action={unpublishSetAction}>
+                  <input type="hidden" name="setId" value={id} />
+                  <button
+                    type="submit"
+                    className="flex h-10 items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900"
+                  >
+                    Unpublish
+                  </button>
+                </form>
+              ) : (
+                <form action={publishSetAction}>
+                  <input type="hidden" name="setId" value={id} />
+                  <button
+                    type="submit"
+                    className="flex h-10 items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900"
+                  >
+                    Publish
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+            Publishing is allowed even if incomplete. Users will only see spots that have a screenshot + augments + a pro answer.
           </div>
         </section>
       </main>

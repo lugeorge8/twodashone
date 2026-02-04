@@ -12,8 +12,7 @@ export default function Home() {
             Practice Stage 2-1 augment decisions.
           </h1>
           <p className="max-w-xl text-base leading-7 text-zinc-600 dark:text-zinc-400">
-            10 quick scenarios. Pick an augment, then see the best pick and the streamer who
-            took it.
+            10 quick scenarios, plus curated training sets scored against pro answers.
           </p>
         </header>
 
