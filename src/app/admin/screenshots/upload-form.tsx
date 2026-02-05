@@ -32,7 +32,11 @@ export default function UploadForm() {
 
     try {
       for (const f of files) {
-        await upload(f.name, f, {
+        const safePatch = encodeURIComponent(patch.trim());
+        const uniqueName = `${crypto.randomUUID()}-${f.name}`;
+        const pathname = `screenshots-library/${safePatch}/${uniqueName}`;
+
+        await upload(pathname, f, {
           access: "public",
           handleUploadUrl: "/api/blob",
           clientPayload: JSON.stringify({ patch: patch.trim(), mode, stage }),

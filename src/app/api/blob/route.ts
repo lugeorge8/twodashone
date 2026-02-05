@@ -31,13 +31,18 @@ export async function POST(req: Request): Promise<NextResponse> {
       }
 
       // Only allow our screenshot library path.
-      const safePath = `screenshots-library/${encodeURIComponent(patch)}/${Date.now()}-${Math.random().toString(16).slice(2)}-${pathname}`;
+      const safePrefix = `screenshots-library/${encodeURIComponent(patch)}/`;
+      const safePath = String(pathname || '').startsWith(safePrefix)
+        ? String(pathname)
+        : `${safePrefix}${Date.now()}-${Math.random().toString(16).slice(2)}-${String(pathname || 'upload')}`;
 
       return {
         pathname: safePath,
         maximumSizeInBytes: 10 * 1024 * 1024,
         allowedContentTypes: ['image/png', 'image/jpeg', 'image/webp'],
         tokenPayload: JSON.stringify({ patch, stage, mode }),
+        addRandomSuffix: true,
+        allowOverwrite: true,
       };
     },
     onUploadCompleted: async ({ blob, tokenPayload }) => {
