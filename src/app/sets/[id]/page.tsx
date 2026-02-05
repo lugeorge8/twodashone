@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { sql } from '@/lib/db';
+import SetPlayClient from './set-play-client';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,9 @@ export default async function SetPlayPage({ params }: { params: Promise<{ id: st
   if (!set) {
     return (
       <div className="min-h-screen bg-zinc-50 p-10">
-        <Link href="/sets" className="underline">Back</Link>
+        <Link href="/sets" className="underline">
+          Back
+        </Link>
         <div className="mt-4">Set not found (or not published).</div>
       </div>
     );
@@ -83,14 +86,12 @@ export default async function SetPlayPage({ params }: { params: Promise<{ id: st
           </div>
         </section>
 
-        <section className="rounded-2xl border border-zinc-200 bg-white p-6 text-sm shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-          <div>
-            Public playthrough UI is next; for now this page confirms filtering works.
-          </div>
-          <pre className="mt-4 max-h-96 overflow-auto rounded-xl bg-zinc-50 p-3 text-xs dark:bg-zinc-900">
-            {JSON.stringify(playable.slice(0, 2), null, 2)}
-          </pre>
-        </section>
+        <SetPlayClient setId={set.id} spots={playable} />
+
+        <footer className="pt-4 text-xs leading-5 text-zinc-500 dark:text-zinc-400">
+          Disclaimer: This is a training tool. “Best pick” reflects the pro’s answer for the
+          spot and may not generalize.
+        </footer>
       </main>
     </div>
   );
