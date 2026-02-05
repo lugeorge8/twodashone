@@ -1,6 +1,10 @@
 import Link from "next/link";
 
-export default function Home() {
+import { sql } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 dark:bg-black dark:text-zinc-50">
       <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-between px-5 py-12">
@@ -30,6 +34,23 @@ export default function Home() {
                 className="flex h-11 items-center justify-center rounded-xl bg-black px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
               >
                 Start MVP
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="text-sm font-semibold">Training sets (pro-scored)</div>
+                <div className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                  Play published sets and see pro reasoning after each spot
+                </div>
+              </div>
+              <Link
+                href="/sets"
+                className="flex h-11 items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900"
+              >
+                Browse sets
               </Link>
             </div>
           </div>
