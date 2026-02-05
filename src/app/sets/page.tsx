@@ -6,11 +6,12 @@ export const dynamic = 'force-dynamic';
 export default async function SetsIndexPage() {
   const sets = await sql<{
     id: string;
+    title: string;
     patch: string;
     tier_mode: string;
     published_at: string | null;
   }>`
-    select id, patch, tier_mode, published_at
+    select id, title, patch, tier_mode, published_at
     from training_sets
     where status = 'published'
     order by published_at desc nulls last, id desc
@@ -46,7 +47,7 @@ export default async function SetsIndexPage() {
                   href={`/sets/${encodeURIComponent(s.id)}`}
                   className="rounded-xl border border-zinc-200 bg-white p-4 text-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900"
                 >
-                  <div className="font-semibold">{s.id}</div>
+                  <div className="font-semibold">{s.title || s.id}</div>
                   <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
                     patch {s.patch} · {s.tier_mode}
                   </div>

@@ -19,9 +19,14 @@ export async function createTrainingSetAction(formData: FormData) {
   const patch = String(formData.get('patch') ?? '').trim();
   const tierMode = String(formData.get('tierMode') ?? 'mixed').trim() as TierMode;
   const mode = String(formData.get('mode') ?? 'augment_2_1').trim() as TrainingMode;
+  const titleSuffix = String(formData.get('titleSuffix') ?? '').trim();
 
   if (!patch) {
     redirect('/admin/sets/new?error=patch');
+  }
+
+  if (!titleSuffix) {
+    redirect('/admin/sets/new?error=title');
   }
 
   if (!['mixed', 'silver', 'gold', 'prismatic'].includes(tierMode)) {
@@ -47,7 +52,11 @@ export async function createTrainingSetAction(formData: FormData) {
     if (m) nextSeq = Number(m[1]) + 1;
   }
 
-  const id = formatTrainingSetId({ proSlug: slugifyPro(session.displayName ?? 'Pro'), patch, seq: nextSeq });
+  const proName = session.displayName ?? 'Pro';
+  const proSlug = slugifyPro(proName);
+  const id = formatTrainingSetId({ proSlug, patch, seq: nextSeq });
+
+  const title = `${proSlug}.patch${patch}.${titleSuffix}`;
 
   const augStage = modeToAugmentStage(mode);
   const stageLabel = modeToStageLabel(mode);
@@ -71,8 +80,8 @@ export async function createTrainingSetAction(formData: FormData) {
   // For MVP, we do best-effort inserts and cleanup on failure.
   try {
     await sql`
-      insert into training_sets (id, patch, pro_id, tier_mode, status, mode)
-      values (${id}, ${patch}, ${session.proId!}, ${tierMode}, 'draft', ${mode})
+      insert into training_sets (id, title, patch, pro_id, tier_mode, status, mode)
+      values (${id}, ${title}, ${patch}, ${session.proId!}, ${tierMode}, 'draft', ${mode})
     `;
 
     for (const s of gen.spots) {

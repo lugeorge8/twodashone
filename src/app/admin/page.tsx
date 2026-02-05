@@ -9,12 +9,13 @@ export default async function AdminHome() {
 
   const sets = await sql<{
     id: string;
+    title: string;
     patch: string;
     tier_mode: string;
     status: string;
     created_at: string;
   }>`
-    select id, patch, tier_mode, status, created_at
+    select id, title, patch, tier_mode, status, created_at
     from training_sets
     where pro_id = ${session.proId!}
     order by created_at desc
@@ -79,7 +80,7 @@ export default async function AdminHome() {
                     className="min-w-0 flex-1 hover:underline"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <div className="truncate font-semibold">{s.id}</div>
+                      <div className="truncate font-semibold">{s.title || s.id}</div>
                       <div className="text-xs text-zinc-500 dark:text-zinc-400">{s.status}</div>
                     </div>
                     <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
