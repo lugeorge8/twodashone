@@ -32,7 +32,7 @@ export default async function NewTrainingSetPage({
           {sp.error && (
             <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-900 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-100">
               {sp.error === 'no-screenshots'
-                ? 'No screenshots found for that patch (stage 1-4). Upload screenshots first.'
+                ? 'No screenshots found for that patch+mode. Upload screenshots for the selected patch and augment stage first.'
                 : `Missing/invalid field: ${sp.error}`}
             </div>
           )}
@@ -55,12 +55,20 @@ export default async function NewTrainingSetPage({
             </label>
             <label className="grid gap-1">
               <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Patch</span>
-              <input
+              <select
                 name="patch"
-                placeholder="16.03b"
-                required
+                defaultValue="16.04"
                 className="h-11 rounded-xl border border-zinc-200 bg-white px-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
-              />
+              >
+                {Array.from({ length: 10 }).map((_, i) => {
+                  const p = `16.${String(i + 1).padStart(2, '0')}`;
+                  return (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  );
+                })}
+              </select>
             </label>
 
             <label className="grid gap-1">
