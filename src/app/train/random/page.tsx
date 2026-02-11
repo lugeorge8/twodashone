@@ -7,10 +7,10 @@ export default function RandomTrainPage() {
       <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-10">
         <header className="flex items-center justify-between">
           <Link
-            href="/train"
+            href="/"
             className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
           >
-            ← Back
+            ← Home
           </Link>
           <div className="text-sm text-zinc-500 dark:text-zinc-400">twodashone · Random augments</div>
         </header>
