@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { requireProSession } from '@/lib/auth/session';
+import { sql } from '@/lib/db';
 import { createTrainingSetAction } from './actions';
+
+import ScreenshotCountClient from './screenshot-count-client';
 
 export default async function NewTrainingSetPage({
   searchParams,
@@ -9,6 +12,18 @@ export default async function NewTrainingSetPage({
 }) {
   await requireProSession();
   const sp = await searchParams;
+
+  const countsRes = await sql<{ patch: string; mode: string; count: number }>`
+    select patch, mode, count(*)::int as count
+    from screenshots
+    group by patch, mode
+  `;
+
+  const counts: Record<string, any> = {};
+  for (const r of countsRes.rows) {
+    counts[r.patch] ??= {};
+    counts[r.patch][r.mode] = r.count;
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 dark:bg-black dark:text-zinc-50">
@@ -38,38 +53,7 @@ export default async function NewTrainingSetPage({
           )}
 
           <form action={createTrainingSetAction} className="mt-6 grid gap-4">
-            <label className="grid gap-1">
-              <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Mode</span>
-              <select
-                name="mode"
-                defaultValue="augment_2_1"
-                className="h-11 rounded-xl border border-zinc-200 bg-white px-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
-              >
-                <option value="augment_2_1">Augments (2-1)</option>
-                <option value="augment_3_2">Augments (3-2)</option>
-                <option value="augment_4_2">Augments (4-2)</option>
-              </select>
-              <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                Separate training sets per stage.
-              </div>
-            </label>
-            <label className="grid gap-1">
-              <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Patch</span>
-              <select
-                name="patch"
-                defaultValue="16.04"
-                className="h-11 rounded-xl border border-zinc-200 bg-white px-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
-              >
-                {Array.from({ length: 10 }).map((_, i) => {
-                  const p = `16.${String(i + 1).padStart(2, '0')}`;
-                  return (
-                    <option key={p} value={p}>
-                      {p}
-                    </option>
-                  );
-                })}
-              </select>
-            </label>
+            <ScreenshotCountClient initialPatch="16.04" initialMode="augment_2_1" counts={counts} />
 
             <label className="grid gap-1">
               <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Title suffix</span>
