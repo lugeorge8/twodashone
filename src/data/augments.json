@@ -2,7 +2,7 @@
   {
     "name": "3 Threes",
     "tier": "gold",
-    "description": "Gain 3 random 2-star 3-cost champions and 8 gold.",
+    "description": "Gain 3 random 2-star 3-cost champions and 3 gold.",
     "stages": {
       "2": false,
       "3": false,
@@ -72,7 +72,7 @@
   {
     "name": "Ascension",
     "tier": "gold",
-    "description": "After 15 seconds of combat, gain 60% Damage Amp.",
+    "description": "After 12 seconds of combat, gain 45% Damage Amp.",
     "stages": {
       "2": false,
       "3": true,
@@ -462,7 +462,7 @@
   {
     "name": "Commerce Core",
     "tier": "prismatic",
-    "description": "Gain 10 free Shop rerolls now and 4 every round for the rest of the game.",
+    "description": "Gain 16 free Shop rerolls now and 2 every round for the rest of the game.",
     "stages": {
       "2": false,
       "3": false,
@@ -732,7 +732,7 @@
   {
     "name": "Efficient Shopper",
     "tier": "silver",
-    "description": "For the next 4 carousels, gain a second copy of the champion taken.",
+    "description": "For the next 4 carousels, gain a second copy of the champion taken. Gain 4 gold.",
     "stages": {
       "2": true,
       "3": false,
@@ -742,7 +742,7 @@
   {
     "name": "Epic Rolldown",
     "tier": "gold",
-    "description": "When you reach Level 8, gain 23 Shop rerolls.",
+    "description": "When you reach Level 8, gain 20 Shop rerolls.",
     "stages": {
       "2": false,
       "3": true,
@@ -912,7 +912,7 @@
   {
     "name": "Flexible",
     "tier": "prismatic",
-    "description": "Gain 1 random Emblem. At the start of every Stage, gain a random Emblem. Your team gains 20 Health for each Emblem they are holding.",
+    "description": "Gain 1 random Emblem. At the start of every Stage, gain a random Emblem. Your team gains 40 Health for each Emblem they are holding.",
     "stages": {
       "2": true,
       "3": false,
@@ -976,6 +976,16 @@
     "stages": {
       "2": false,
       "3": true,
+      "4": true
+    }
+  },
+  {
+    "name": "Gilded Steel",
+    "tier": "gold",
+    "description": "Gain 3 non-Tank 5-cost champions. If you field a 5-cost champion, your 1 to 4-cost champions gain 8% Durability.",
+    "stages": {
+      "2": false,
+      "3": false,
       "4": true
     }
   },
@@ -1212,7 +1222,7 @@
   {
     "name": "Indecision I",
     "tier": "gold",
-    "description": "In 3 rounds, choose a new augment of the same tier. Gain 8 gold now.",
+    "description": "In 3 rounds, choose a new augment of the same tier. Gain 5 gold now.",
     "stages": {
       "2": false,
       "3": true,
@@ -1222,7 +1232,7 @@
   {
     "name": "Indecision II",
     "tier": "prismatic",
-    "description": "In 3 rounds, choose a new augment of the same tier. Gain 12 gold now.",
+    "description": "In 3 rounds, choose a new augment of the same tier. Gain 8 gold now.",
     "stages": {
       "2": false,
       "3": true,
@@ -1312,7 +1322,7 @@
   {
     "name": "Jeweled Lotus II",
     "tier": "prismatic",
-    "description": "Your team gains 35% Critical Strike Chance and 10% Critical Strike Damage, and their Abilities can critically strike.",
+    "description": "Your team gains 25% Critical Strike Chance and 10% Critical Strike Damage, and their Abilities can critically strike.",
     "stages": {
       "2": false,
       "3": true,
@@ -1432,7 +1442,7 @@
   {
     "name": "Living Forge",
     "tier": "prismatic",
-    "description": "Gain an Artifact anvil now and after every 10 player combats.",
+    "description": "Gain an Artifact anvil now and after every 9 player combats.",
     "stages": {
       "2": true,
       "3": false,
@@ -1522,7 +1532,7 @@
   {
     "name": "Max Build",
     "tier": "gold",
-    "description": "Gain a Champion Duplicator and 5 free Shop rerolls. On Stage 6-1, gain these again.",
+    "description": "Gain 10 free Shop rerolls now. On 4-5 and 6-1, gain a Champion Duplicator.",
     "stages": {
       "2": false,
       "3": false,
@@ -1594,7 +1604,7 @@
     "tier": "silver",
     "description": "Whenever you star up a champion that you fielded last combat, gain 2 free Shop rerolls. Gain 2 gold.",
     "stages": {
-      "2": true,
+      "2": false,
       "3": true,
       "4": false
     }
@@ -1882,7 +1892,7 @@
   {
     "name": "ReinFOURcement",
     "tier": "gold",
-    "description": "The next 4-cost champion you buy with gold is instantly upgraded to 2-star. Gain 12 gold.",
+    "description": "The next 4-cost champion you buy with gold is instantly upgraded to 2-star. Gain 5 gold.",
     "stages": {
       "2": false,
       "3": false,
@@ -2172,7 +2182,7 @@
   {
     "name": "Spirit of Redemption",
     "tier": "gold",
-    "description": "Gain a Spirit Visage. Every 5 seconds, Spirit Visage heals allies within 1 hex for 10% of their missing Health.",
+    "description": "Gain a Spirit Visage. Every 5 seconds, Spirit Visage heals allies within 1 hex for 7.5% of their missing Health.",
     "stages": {
       "2": true,
       "3": true,
@@ -2390,6 +2400,16 @@
     }
   },
   {
+    "name": "The World Runes",
+    "tier": "prismatic",
+    "description": "Gain 2 Emblems from random Region traits. Gain 2 XP every player combat, increased to 4 XP if 4 or more Region traits are active.",
+    "stages": {
+      "2": true,
+      "3": false,
+      "4": false
+    }
+  },
+  {
     "name": "Thorn-Plated Armor",
     "tier": "gold",
     "description": "Gain a Bramble Vest. Your Bramble Vests deal 20-170% more damage (based on Stage).",
@@ -2470,6 +2490,16 @@
     }
   },
   {
+    "name": "Trials of Twilight II",
+    "tier": "prismatic",
+    "description": "Gain 2 Xin Zhaos and a Bloodthirster. Xin Zhao becomes an Attack Fighter. After 5 combats at 3-star, unlock Zaahen. At the start of the next 3 stages, gain a Lesser Champion Duplicator.",
+    "stages": {
+      "2": true,
+      "3": false,
+      "4": false
+    }
+  },
+  {
     "name": "Trifecta I",
     "tier": "gold",
     "description": "Gain 2 3-cost champions. Combat Start: 3 random 3-cost champions gain 220 Health and 20% Attack Speed.",
@@ -2492,7 +2522,7 @@
   {
     "name": "Twin Guardians",
     "tier": "silver",
-    "description": "If you have exactly 2 allies in your first row, grant them 40 Armor and 40 Magic Resist.",
+    "description": "If you have exactly 2 allies in your first row, grant them 50 Armor and 50 Magic Resist.",
     "stages": {
       "2": false,
       "3": true,
