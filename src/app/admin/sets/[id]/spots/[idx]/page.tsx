@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { requireProSession } from '@/lib/auth/session';
 import { sql } from '@/lib/db';
-import { generateSpotAugmentsAction, saveSpotAnswerAction, uploadSpotScreenshotAction } from './spot-actions';
+import { generateSpotAugmentsAction, saveSpotAnswerAction } from './spot-actions';
 import AugmentActionClient from './augment-action-client';
 
 type Opt = {
@@ -102,24 +102,10 @@ export default async function AdminSpotPage({ params }: { params: Promise<{ id: 
             <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">No screenshot uploaded yet.</div>
           )}
 
-          {/* Upload is kept for now; later we’ll remove once all screenshots come from the library. */}
-          <form action={uploadSpotScreenshotAction} encType="multipart/form-data" className="mt-4 grid gap-3">
-            <input type="hidden" name="setId" value={setId} />
-            <input type="hidden" name="idx" value={spotIdx} />
-
-            <input name="screenshotFile" type="file" accept="image/png,image/jpeg,image/webp" className="text-sm" />
-
-            <button
-              type="submit"
-              className="h-10 rounded-xl bg-black px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-            >
-              Upload screenshot
-            </button>
-
-            <div className="text-xs text-zinc-500 dark:text-zinc-400">
-              Stored on Vercel Blob as an unguessable URL (public).
-            </div>
-          </form>
+          <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+            Screenshots are attached when the set is created (from the screenshot library). To change screenshots,
+            upload more screenshots in <span className="font-mono">/admin/screenshots</span> and regenerate the set (or we can add a picker later).
+          </div>
         </section>
 
         <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
