@@ -45,11 +45,23 @@ export default function UploadForm() {
         const uniqueName = `${crypto.randomUUID()}-${f.name}`;
         const pathname = `screenshots-library/${safePatch}/${uniqueName}`;
 
-        await upload(pathname, f, {
+        const blob = await upload(pathname, f, {
           access: "public",
           handleUploadUrl: "/api/blob",
           clientPayload: JSON.stringify({ patch: patch.trim(), mode, stage: stageLabel }),
         });
+
+        // Register in DB via API so the UI can reflect it immediately.
+        const res = await fetch('/api/screenshots/register', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ patch: patch.trim(), mode, stage: stageLabel, url: blob.url }),
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`register failed: ${res.status} ${text}`);
+        }
+
         setDone((v) => v + 1);
       }
 
