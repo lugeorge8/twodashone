@@ -30,6 +30,7 @@ export default function SetPlayClient({
   const [i, setI] = useState(0);
   const [choice, setChoice] = useState<ChoiceState | null>(null);
   const [rerolled, setRerolled] = useState({ a: false, b: false, c: false });
+  const [score, setScore] = useState({ correct: 0, total: 0 });
 
   const spot = playable[i];
   const isDone = i >= playable.length;
@@ -37,10 +38,21 @@ export default function SetPlayClient({
   function restart() {
     setChoice(null);
     setRerolled({ a: false, b: false, c: false });
+    setScore({ correct: 0, total: 0 });
     setI(0);
   }
 
   function next() {
+    // If the user just answered, score it once.
+    if (choice) {
+      const gotItRight =
+        choice.kind === 'picked' ? choice.chosenId === spot.correctPickId : false;
+      setScore((s) => ({
+        correct: s.correct + (gotItRight ? 1 : 0),
+        total: s.total + 1,
+      }));
+    }
+
     setChoice(null);
     setRerolled({ a: false, b: false, c: false });
     setI((v) => v + 1);
@@ -66,6 +78,9 @@ export default function SetPlayClient({
     return (
       <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
         <h2 className="text-xl font-semibold">Done.</h2>
+        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+          Score: <span className="font-semibold">{score.correct}</span> / {score.total} correct.
+        </p>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
           You finished {playable.length} spots in {setId}.
         </p>
@@ -124,7 +139,7 @@ export default function SetPlayClient({
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            Spot {i + 1} / {playable.length} (original #{spot.idx})
+            Spot {i + 1} / {playable.length} (original #{spot.idx}) · Score {score.correct}/{score.total}
           </div>
           <h2 className="mt-2 text-xl font-semibold">Choose an augment</h2>
           <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
