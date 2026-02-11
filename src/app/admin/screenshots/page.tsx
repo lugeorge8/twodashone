@@ -3,6 +3,8 @@ import { requireProSession } from '@/lib/auth/session';
 import { sql } from '@/lib/db';
 import UploadForm from './upload-form';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminScreenshotsPage({
   searchParams,
 }: {
@@ -11,8 +13,8 @@ export default async function AdminScreenshotsPage({
   await requireProSession();
   const sp = await searchParams;
 
-  const recent = await sql<{ patch: string; stage: string; image_url: string; created_at: string }>`
-    select patch, stage, image_url, created_at
+  const recent = await sql<{ patch: string; mode: string; stage: string; image_url: string; created_at: string }>`
+    select patch, mode, stage, image_url, created_at
     from screenshots
     order by created_at desc
     limit 25
@@ -64,7 +66,7 @@ export default async function AdminScreenshotsPage({
                 className="rounded-xl border border-zinc-200 bg-white p-3 text-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900"
               >
                 <div className="flex items-center justify-between">
-                  <div className="font-semibold">{r.patch} · {r.stage}</div>
+                  <div className="font-semibold">{r.patch} · {r.mode} · {r.stage}</div>
                   <div className="text-xs text-zinc-500 dark:text-zinc-400">{new Date(r.created_at).toLocaleString()}</div>
                 </div>
                 <div className="mt-1 truncate text-xs text-zinc-600 dark:text-zinc-400">{r.image_url}</div>
