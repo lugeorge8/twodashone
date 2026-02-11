@@ -96,5 +96,5 @@ export async function createTrainingSetAction(formData: FormData) {
     throw e;
   }
 
-  redirect(`/admin/sets/${encodeURIComponent(id)}`);
+  redirect(`/admin/sets/${encodeURIComponent(id)}/spots/1`);
 }
