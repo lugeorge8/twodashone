@@ -150,19 +150,9 @@
     }
   },
   {
-    "name": "Bandle Bounty I",
-    "tier": "gold",
-    "description": "For every Yordle you've unlocked or unlock, gain 2 gold. The Bandle Paths reveal a secret Yordle 10. Gain a Rumble and Lulu.",
-    "stages": {
-      "2": false,
-      "3": true,
-      "4": false
-    }
-  },
-  {
     "name": "Bandle Bounty II",
     "tier": "prismatic",
-    "description": "For every Yordle you've unlocked or unlock, gain 4 gold. The Bandle Paths reveal a secret Yordle 10! Gain a Tristana and Teemo.",
+    "description": "For every Yordle you've unlocked or unlock, gain 2 gold. The Bandle Paths reveal a secret Yordle 10! Gain a Tristana and Teemo. (Prismatic 10 Yordle now requires Level 10.)",
     "stages": {
       "2": false,
       "3": true,
@@ -900,16 +890,6 @@
     }
   },
   {
-    "name": "Firesale",
-    "tier": "silver",
-    "description": "Each round, steal a random 3-cost or lower champion from the shop. Gain 1 gold.",
-    "stages": {
-      "2": false,
-      "3": true,
-      "4": false
-    }
-  },
-  {
     "name": "Flexible",
     "tier": "prismatic",
     "description": "Gain 1 random Emblem. At the start of every Stage, gain a random Emblem. Your team gains 40 Health for each Emblem they are holding.",
@@ -1530,16 +1510,6 @@
     }
   },
   {
-    "name": "Max Build",
-    "tier": "gold",
-    "description": "Gain 10 free Shop rerolls now. On 4-5 and 6-1, gain a Champion Duplicator.",
-    "stages": {
-      "2": false,
-      "3": false,
-      "4": true
-    }
-  },
-  {
     "name": "Mess Hall",
     "tier": "gold",
     "description": "After 10 seconds of combat, your champions gain 8% Attack Speed and attacks also hurl 2 delicious projectiles that deal 25 (Attack damageAbility power) magic damage.",
@@ -1712,10 +1682,10 @@
   {
     "name": "Pilfer",
     "tier": "gold",
-    "description": "Each round, gain a 1-star copy of the first champion you killed last combat. The first time you gain 35 gold worth of champions in this way, gain a Thief's Gloves. 0",
+    "description": "Each round, gain a 1-star copy of the first champion you killed last combat. The first time you gain 25 gold worth of champions in this way, gain a Thief's Gloves. 0",
     "stages": {
-      "2": true,
-      "3": false,
+      "2": false,
+      "3": true,
       "4": false
     }
   },
@@ -2590,19 +2560,9 @@
     }
   },
   {
-    "name": "Walk The True Path I",
-    "tier": "gold",
-    "description": "Gain a Lesser Champion Duplicator, a Shen, a Jhin, and 6 gold. Ionia 10 gains a Prismatic upgrade.",
-    "stages": {
-      "2": false,
-      "3": true,
-      "4": false
-    }
-  },
-  {
     "name": "Walk The True Path II",
     "tier": "prismatic",
-    "description": "Gain 2 Lesser Champion Duplicators, a Jhin, a Shen, and an Infinity Edge. Ionia 10 gains a Prismatic upgrade.",
+    "description": "Gain 2 Lesser Champion Duplicators, a Yasuo, and a BF Sword. Ionia 10 gains a Prismatic upgrade. (Does not appear on the Path of Enlightenment. Prismatic 10 Ionia now requires Level 10.)",
     "stages": {
       "2": false,
       "3": true,
