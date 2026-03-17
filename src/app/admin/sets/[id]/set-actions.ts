@@ -46,3 +46,25 @@ export async function unpublishSetAction(formData: FormData) {
 
   redirect(`/admin/sets/${encodeURIComponent(setId)}`);
 }
+
+export async function updateSetTitleAction(formData: FormData) {
+  const session = await requireProSession();
+  const setId = String(formData.get('setId') ?? '').trim();
+  const title = String(formData.get('title') ?? '').trim();
+
+  if (!setId) redirect('/admin');
+  await assertSetOwnership(session.proId!, setId);
+
+  // Keep the title short and predictable.
+  if (title.length > 120) {
+    redirect(`/admin/sets/${encodeURIComponent(setId)}?error=title-too-long`);
+  }
+
+  await sql`
+    update training_sets
+    set title = ${title}
+    where id = ${setId}
+  `;
+
+  redirect(`/admin/sets/${encodeURIComponent(setId)}`);
+}

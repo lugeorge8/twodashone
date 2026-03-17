@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { requireProSession } from '@/lib/auth/session';
 import { sql } from '@/lib/db';
-import { publishSetAction, unpublishSetAction } from './set-actions';
+import { publishSetAction, unpublishSetAction, updateSetTitleAction } from './set-actions';
 
 export default async function AdminSetPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await requireProSession();
@@ -9,12 +9,13 @@ export default async function AdminSetPage({ params }: { params: Promise<{ id: s
 
   const setRes = await sql<{
     id: string;
+    title: string;
     patch: string;
     tier_mode: string;
     status: string;
     created_at: string;
   }>`
-    select id, patch, tier_mode, status, created_at
+    select id, title, patch, tier_mode, status, created_at
     from training_sets
     where id = ${id} and pro_id = ${session.proId!}
     limit 1
@@ -52,10 +53,32 @@ export default async function AdminSetPage({ params }: { params: Promise<{ id: s
         </header>
 
         <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-          <h1 className="text-xl font-semibold">{set.id}</h1>
+          <h1 className="text-xl font-semibold">{set.title || set.id}</h1>
+          <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">ID: {set.id}</div>
           <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
             patch {set.patch} · {set.tier_mode} · created {new Date(set.created_at).toLocaleString()}
           </div>
+
+          <form action={updateSetTitleAction} className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end">
+            <input type="hidden" name="setId" value={id} />
+            <label className="flex-1">
+              <div className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+                Title
+              </div>
+              <input
+                name="title"
+                defaultValue={set.title ?? ''}
+                placeholder="Set title"
+                className="mt-1 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 shadow-sm outline-none placeholder:text-zinc-400 focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-500"
+              />
+            </label>
+            <button
+              type="submit"
+              className="flex h-10 items-center justify-center rounded-xl bg-black px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+            >
+              Save title
+            </button>
+          </form>
 
           <div className="mt-4 grid gap-1 text-sm text-zinc-700 dark:text-zinc-300">
             <div>Screenshots: {c?.with_screenshot ?? 0} / {c?.total ?? 20}</div>
