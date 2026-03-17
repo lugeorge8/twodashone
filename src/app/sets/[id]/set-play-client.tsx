@@ -150,12 +150,15 @@ export default function SetPlayClient({
       </div>
 
       {spot.screenshotUrl ? (
-        <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-          <LightboxImage
-            src={spot.screenshotUrl}
-            alt={`Spot ${spot.idx} screenshot`}
-            className="h-auto w-full"
-          />
+        <div className="mt-6">
+          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+            <LightboxImage
+              src={spot.screenshotUrl}
+              alt={`Spot ${spot.idx} screenshot`}
+              className="h-auto w-full"
+            />
+          </div>
+          <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">Click to enlarge</div>
         </div>
       ) : null}
 
