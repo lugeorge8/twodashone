@@ -190,10 +190,24 @@ export default function SetPlayClient({
                     : 'bg-white text-zinc-900 hover:bg-zinc-50 disabled:opacity-60 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900')
                 }
               >
-                <span className={'truncate' + (a.id.endsWith('x') ? ' text-zinc-600 dark:text-zinc-300' : '')}>
-                  {a.name}
+                <span className="min-w-0">
+                  <div className={'truncate' + (a.id.endsWith('x') ? ' text-zinc-600 dark:text-zinc-300' : '')}>
+                    {a.name}
+                  </div>
+                  {a.description ? (
+                    <div
+                      className={
+                        'mt-1 line-clamp-2 text-xs font-normal leading-5 ' +
+                        (selected
+                          ? 'text-zinc-200 dark:text-zinc-700'
+                          : 'text-zinc-600 dark:text-zinc-400')
+                      }
+                    >
+                      {a.description}
+                    </div>
+                  ) : null}
                 </span>
-                <span className="ml-3 text-xs opacity-70">Pick</span>
+                <span className="ml-3 shrink-0 text-xs opacity-70">Pick</span>
               </button>
 
               <button
@@ -227,15 +241,21 @@ export default function SetPlayClient({
 
       {choice && (
         <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="font-semibold">
-            Best pick: {best?.name ?? '(missing)'}
-          </div>
+          <div className="font-semibold">Best pick: {best?.name ?? '(missing)'}</div>
+          {best?.description ? (
+            <div className="mt-1 text-xs leading-5 text-zinc-600 dark:text-zinc-300">{best.description}</div>
+          ) : null}
 
           {choice.kind === 'picked' ? (
-            <div className="mt-1 text-zinc-600 dark:text-zinc-300">
-              You picked: {pickedOpt?.name ?? '(missing)'}
-              {wasCorrect ? ' (correct)' : ' (wrong)'}
-            </div>
+            <>
+              <div className="mt-1 text-zinc-600 dark:text-zinc-300">
+                You picked: {pickedOpt?.name ?? '(missing)'}
+                {wasCorrect ? ' (correct)' : ' (wrong)'}
+              </div>
+              {pickedOpt?.description ? (
+                <div className="mt-1 text-xs leading-5 text-zinc-600 dark:text-zinc-300">{pickedOpt.description}</div>
+              ) : null}
+            </>
           ) : (
             <div className="mt-1 text-zinc-600 dark:text-zinc-300">
               You rerolled the pro-selected slot ({choice.base.toUpperCase()}) → instant loss.
