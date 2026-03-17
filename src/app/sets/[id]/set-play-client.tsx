@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import LightboxImage from '@/components/LightboxImage';
 
 type Opt = { id: string; name: string; description: string; tier: string };
 
@@ -150,8 +151,7 @@ export default function SetPlayClient({
 
       {spot.screenshotUrl ? (
         <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-          {/* Avoid Next/Image remotePatterns config for blob URLs. */}
-          <img
+          <LightboxImage
             src={spot.screenshotUrl}
             alt={`Spot ${spot.idx} screenshot`}
             className="h-auto w-full"

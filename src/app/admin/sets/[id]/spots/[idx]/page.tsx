@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import LightboxImage from '@/components/LightboxImage';
 import { requireProSession } from '@/lib/auth/session';
 import { sql } from '@/lib/db';
 import { generateSpotAugmentsAction, saveSpotAnswerAction } from './spot-actions';
@@ -90,7 +91,7 @@ export default async function AdminSpotPage({ params }: { params: Promise<{ id: 
           {spot.screenshot_url ? (
             <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
               {/* Use plain img to avoid Next Image remotePatterns config. */}
-              <img src={spot.screenshot_url} alt={`Spot ${spotIdx} screenshot`} className="h-auto w-full" />
+              <LightboxImage src={spot.screenshot_url} alt={`Spot ${spotIdx} screenshot`} className="h-auto w-full" />
               <div className="flex items-center justify-between px-3 py-2 text-xs text-zinc-500 dark:text-zinc-400">
                 <span>Preview</span>
                 <a className="underline" href={spot.screenshot_url} target="_blank" rel="noreferrer">
