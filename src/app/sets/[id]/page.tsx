@@ -45,8 +45,9 @@ export default async function SetPlayPage({ params }: { params: Promise<{ id: st
     correct_pick_id: string;
     correct_action_type: string;
     correct_augment_note: string | null;
+    pro_roll_order: unknown;
   }>`
-    select idx, screenshot_url, augment_options, correct_pick_id, correct_action_type, correct_augment_note
+    select idx, screenshot_url, augment_options, correct_pick_id, correct_action_type, correct_augment_note, pro_roll_order
     from training_spots
     where set_id = ${id}
       and screenshot_url is not null and screenshot_url <> ''
@@ -61,6 +62,7 @@ export default async function SetPlayPage({ params }: { params: Promise<{ id: st
     correctPickId: s.correct_pick_id,
     correctActionType: s.correct_action_type,
     note: s.correct_augment_note,
+    proRollOrder: Array.isArray(s.pro_roll_order) ? (s.pro_roll_order as any[]).map((x) => String(x)) : [],
   }));
 
   return (

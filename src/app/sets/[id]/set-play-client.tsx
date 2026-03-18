@@ -13,6 +13,7 @@ type Spot = {
   correctPickId: string; // 'a'|'b'|'c'|'a1'|'b1'|'c1'
   correctActionType: string; // 'pick'|'reroll_then_pick'
   note: string | null;
+  proRollOrder: string[];
 };
 
 type ChoiceState =
@@ -264,6 +265,12 @@ export default function SetPlayClient({
               You rerolled the pro-selected slot ({choice.base.toUpperCase()}) → instant loss.
             </div>
           )}
+
+          {spot.proRollOrder?.length ? (
+            <div className="mt-3 text-xs text-zinc-600 dark:text-zinc-300">
+              Pro rerolls: {spot.proRollOrder.map((s) => s.toUpperCase()).join(' → ')}
+            </div>
+          ) : null}
 
           {spot.note ? (
             <div className="mt-3 whitespace-pre-wrap text-zinc-700 dark:text-zinc-200">

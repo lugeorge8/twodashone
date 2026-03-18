@@ -23,6 +23,7 @@ export default function AugmentActionClient({ options, defaultCorrectPickId, dis
   }, [options]);
 
   const [rerolled, setRerolled] = useState({ a: false, b: false, c: false });
+  const [rollOrder, setRollOrder] = useState<Array<'a' | 'b' | 'c'>>([]);
 
   const visible = [
     rerolled.a ? byId.get("a1") ?? byId.get("a") : byId.get("a"),
@@ -39,6 +40,8 @@ export default function AugmentActionClient({ options, defaultCorrectPickId, dis
 
   return (
     <div className="grid gap-3">
+      <input type="hidden" name="proRollOrder" value={JSON.stringify(rollOrder)} />
+
       <div className="text-xs text-zinc-500 dark:text-zinc-400">
         Pro must decide using TFT interaction: A/B/C are shown, reroll reveals A1/B1/C1.
       </div>
@@ -76,7 +79,10 @@ export default function AugmentActionClient({ options, defaultCorrectPickId, dis
 
               <button
                 type="button"
-                onClick={() => setRerolled((r) => ({ ...r, [slot]: true }))}
+                onClick={() => {
+                  setRerolled((r) => ({ ...r, [slot]: true }));
+                  setRollOrder((prev) => (prev.includes(slot) ? prev : [...prev, slot]));
+                }}
                 disabled={disabled || !canReroll}
                 className="flex w-24 items-center justify-center border-l border-zinc-200 px-3 text-xs font-medium text-zinc-800 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-900"
               >

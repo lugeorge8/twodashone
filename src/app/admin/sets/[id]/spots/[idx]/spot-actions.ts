@@ -97,6 +97,7 @@ export async function saveSpotAnswerAction(formData: FormData) {
   const idx = Number(formData.get('idx') ?? '0');
   const correctPickRaw = String(formData.get('correctPickRaw') ?? '').trim();
   const note = String(formData.get('correctAugmentNote') ?? '').trim();
+  const proRollOrderRaw = String(formData.get('proRollOrder') ?? '[]').trim();
 
   if (!setId || !Number.isFinite(idx) || idx < 1 || idx > 20) {
     redirect('/admin');
@@ -107,11 +108,24 @@ export async function saveSpotAnswerAction(formData: FormData) {
   const [correctPickId] = correctPickRaw.split('::');
   const actionType = correctPickId?.endsWith('1') ? 'reroll_then_pick' : 'pick';
 
+  const proRollOrder = (() => {
+    try {
+      const parsed = JSON.parse(proRollOrderRaw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .map((x) => String(x))
+        .filter((x) => x === 'a' || x === 'b' || x === 'c');
+    } catch {
+      return [];
+    }
+  })();
+
   await sql`
     update training_spots
     set correct_pick_id = ${correctPickId || null},
         correct_action_type = ${correctPickId ? actionType : null},
-        correct_augment_note = ${note || null}
+        correct_augment_note = ${note || null},
+        pro_roll_order = ${JSON.stringify(proRollOrder)}::jsonb
     where set_id = ${setId} and idx = ${idx}
   `;
 
