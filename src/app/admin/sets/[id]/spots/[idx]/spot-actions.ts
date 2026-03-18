@@ -120,14 +120,30 @@ export async function saveSpotAnswerAction(formData: FormData) {
     }
   })();
 
-  await sql`
-    update training_spots
-    set correct_pick_id = ${correctPickId || null},
-        correct_action_type = ${correctPickId ? actionType : null},
-        correct_augment_note = ${note || null},
-        pro_roll_order = ${JSON.stringify(proRollOrder)}::jsonb
-    where set_id = ${setId} and idx = ${idx}
-  `;
+  try {
+    await sql`
+      update training_spots
+      set correct_pick_id = ${correctPickId || null},
+          correct_action_type = ${correctPickId ? actionType : null},
+          correct_augment_note = ${note || null},
+          pro_roll_order = ${JSON.stringify(proRollOrder)}::jsonb
+      where set_id = ${setId} and idx = ${idx}
+    `;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.toLowerCase().includes('pro_roll_order') && msg.toLowerCase().includes('does not exist')) {
+      // Backwards compatible: if migration hasn't been applied yet.
+      await sql`
+        update training_spots
+        set correct_pick_id = ${correctPickId || null},
+            correct_action_type = ${correctPickId ? actionType : null},
+            correct_augment_note = ${note || null}
+        where set_id = ${setId} and idx = ${idx}
+      `;
+    } else {
+      throw e;
+    }
+  }
 
   redirect(`/admin/sets/${encodeURIComponent(setId)}/spots/${idx}`);
 }

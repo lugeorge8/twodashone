@@ -38,24 +38,67 @@ export default async function SetPlayPage({ params }: { params: Promise<{ id: st
   }
 
   // Only include "complete" spots
-  const spots = await sql<{
-    idx: number;
-    screenshot_url: string;
-    augment_options: unknown;
-    correct_pick_id: string;
-    correct_action_type: string;
-    correct_augment_note: string | null;
-    pro_roll_order: unknown;
-  }>`
-    select idx, screenshot_url, augment_options, correct_pick_id, correct_action_type, correct_augment_note, pro_roll_order
-    from training_spots
-    where set_id = ${id}
-      and screenshot_url is not null and screenshot_url <> ''
-      and correct_pick_id is not null and correct_pick_id <> ''
-    order by idx asc
-  `;
+  // Backwards compatible: older DBs may not have pro_roll_order yet.
+  let spots:
+    | Awaited<ReturnType<typeof sql<{
+        idx: number;
+        screenshot_url: string;
+        augment_options: unknown;
+        correct_pick_id: string;
+        correct_action_type: string;
+        correct_augment_note: string | null;
+        pro_roll_order: unknown;
+      }>>>
+    | Awaited<ReturnType<typeof sql<{
+        idx: number;
+        screenshot_url: string;
+        augment_options: unknown;
+        correct_pick_id: string;
+        correct_action_type: string;
+        correct_augment_note: string | null;
+      }>>>;
 
-  const playable = spots.rows.map((s) => ({
+  try {
+    spots = await sql<{
+      idx: number;
+      screenshot_url: string;
+      augment_options: unknown;
+      correct_pick_id: string;
+      correct_action_type: string;
+      correct_augment_note: string | null;
+      pro_roll_order: unknown;
+    }>`
+      select idx, screenshot_url, augment_options, correct_pick_id, correct_action_type, correct_augment_note, pro_roll_order
+      from training_spots
+      where set_id = ${id}
+        and screenshot_url is not null and screenshot_url <> ''
+        and correct_pick_id is not null and correct_pick_id <> ''
+      order by idx asc
+    `;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.toLowerCase().includes('pro_roll_order') && msg.toLowerCase().includes('does not exist')) {
+      spots = await sql<{
+        idx: number;
+        screenshot_url: string;
+        augment_options: unknown;
+        correct_pick_id: string;
+        correct_action_type: string;
+        correct_augment_note: string | null;
+      }>`
+        select idx, screenshot_url, augment_options, correct_pick_id, correct_action_type, correct_augment_note
+        from training_spots
+        where set_id = ${id}
+          and screenshot_url is not null and screenshot_url <> ''
+          and correct_pick_id is not null and correct_pick_id <> ''
+        order by idx asc
+      `;
+    } else {
+      throw e;
+    }
+  }
+
+  const playable = spots.rows.map((s: any) => ({
     idx: s.idx,
     screenshotUrl: s.screenshot_url,
     options: normalizeOptions(s.augment_options),
