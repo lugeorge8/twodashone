@@ -6,14 +6,30 @@ import LightboxImage from '@/components/LightboxImage';
 
 type Opt = { id: string; name: string; description: string; tier: string };
 
+type ItemOpt = { id: string; name: string; recipe?: [string, string] };
+
 type Spot = {
   idx: number;
   screenshotUrl: string;
+  mode: string;
+
+  // Augment mode
   options: Opt[];
-  correctPickId: string; // 'a'|'b'|'c'|'a1'|'b1'|'c1'
-  correctActionType: string; // 'pick'|'reroll_then_pick'
+
+  // Augment mode: 'a'|'b'|'c'|'a1'|'b1'|'c1'
+  // Item mode: completed item apiName (string) or null when no-slam.
+  correctPickId: string | null;
+
+  // Augment: 'pick'|'reroll_then_pick'
+  // Item: 'slam'|'no_slam'
+  correctActionType: string | null;
+
   note: string | null;
   proRollOrder: string[];
+
+  // Item mode
+  itemComponents: string[];
+  itemSlamOptions: ItemOpt[];
 };
 
 type ChoiceState =
@@ -127,6 +143,132 @@ export default function SetPlayClient({
     );
   }
 
+  const isItemMode = spot.mode === 'item_2_1';
+
+  if (isItemMode) {
+    const slamOpts = Array.isArray(spot.itemSlamOptions) ? spot.itemSlamOptions : [];
+    const allOpts: ItemOpt[] = [{ id: 'no_slam', name: 'No slam' }, ...slamOpts];
+
+    const byId = new Map<string, ItemOpt>();
+    for (const o of allOpts) byId.set(o.id, o);
+
+    const proAction = spot.correctActionType;
+    const proPickId = spot.correctPickId;
+
+    const best = proAction === 'no_slam' ? byId.get('no_slam') : proPickId ? byId.get(proPickId) : null;
+
+    const pickedOpt = choice?.kind === 'picked' ? byId.get(choice.chosenId) : null;
+    const wasCorrect =
+      choice?.kind === 'picked'
+        ? proAction === 'no_slam'
+          ? choice.chosenId === 'no_slam'
+          : proPickId
+            ? choice.chosenId === proPickId
+            : false
+        : false;
+
+    return (
+      <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              Spot {i + 1} / {playable.length} (original #{spot.idx}) · Score {score.correct}/{score.total}
+            </div>
+            <h2 className="mt-2 text-xl font-semibold">Slam an item?</h2>
+            <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+              You are given a component set. Choose an item to slam, or choose No slam.
+            </p>
+            {spot.itemComponents?.length ? (
+              <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                Components: {spot.itemComponents.join(', ')}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="flex flex-col items-end gap-2">
+            <button
+              type="button"
+              onClick={() => setShowTimer((v) => !v)}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900"
+            >
+              {showTimer ? 'Hide timer' : 'Show timer'}
+            </button>
+
+            {showTimer ? (
+              <div
+                className={
+                  'rounded-lg px-3 py-2 text-xs font-semibold tabular-nums ' +
+                  (timeLeft <= 10
+                    ? 'bg-red-600 text-white'
+                    : 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50')
+                }
+              >
+                {timeLeft}s
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        {spot.screenshotUrl ? (
+          <div className="mt-6">
+            <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+              <LightboxImage src={spot.screenshotUrl} alt={`Spot ${spot.idx} screenshot`} className="h-auto w-full" />
+            </div>
+            <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">Click to enlarge</div>
+          </div>
+        ) : null}
+
+        <div className="mt-6 grid gap-3">
+          {allOpts.map((o) => {
+            const selected = choice?.kind === 'picked' && choice.chosenId === o.id;
+            return (
+              <button
+                key={o.id}
+                onClick={() => {
+                  if (choice) return;
+                  setChoice({ kind: 'picked', chosenId: o.id });
+                }}
+                disabled={!!choice}
+                className={
+                  'flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left text-sm font-medium transition-colors ' +
+                  (selected
+                    ? 'border-black bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-black'
+                    : 'border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900')
+                }
+              >
+                <span className="truncate">{o.name}</span>
+                <span className="ml-3 shrink-0 text-xs opacity-70">Pick</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {choice && (
+          <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="font-semibold">Best: {best?.name ?? '(missing)'}</div>
+            <div className="mt-1 text-zinc-600 dark:text-zinc-300">
+              You picked: {pickedOpt?.name ?? '(missing)'}
+              {wasCorrect ? ' (correct)' : ' (wrong)'}
+            </div>
+
+            {spot.note ? (
+              <div className="mt-3 whitespace-pre-wrap text-zinc-700 dark:text-zinc-200">{spot.note}</div>
+            ) : null}
+
+            <div className="mt-4">
+              <button
+                onClick={next}
+                className="h-11 rounded-xl bg-black px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
+    );
+  }
+
   const byId = new Map<string, Opt>();
   for (const o of spot.options) byId.set(o.id, o);
 
@@ -134,7 +276,7 @@ export default function SetPlayClient({
   const hasB1 = byId.has('b1');
   const hasC1 = byId.has('c1');
 
-  const proPickId = spot.correctPickId;
+  const proPickId = spot.correctPickId ?? '';
   const proBase = (proPickId?.[0] ?? '') as 'a' | 'b' | 'c';
   const proAction = spot.correctActionType;
 

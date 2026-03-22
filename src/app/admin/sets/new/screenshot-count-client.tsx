@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 
-type Mode = 'augment_2_1' | 'augment_3_2' | 'augment_4_2';
+type Mode = 'augment_2_1' | 'augment_3_2' | 'augment_4_2' | 'item_2_1';
 
 type Props = {
   initialPatch: string;
@@ -67,6 +67,7 @@ export default function ScreenshotCountClient({ initialPatch, initialMode, count
             <option value="augment_2_1">Augments (2-1)</option>
             <option value="augment_3_2">Augments (3-2)</option>
             <option value="augment_4_2">Augments (4-2)</option>
+            <option value="item_2_1">Items (2-1 slam)</option>
           </select>
         </label>
       </div>

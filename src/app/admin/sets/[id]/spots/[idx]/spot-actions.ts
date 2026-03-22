@@ -5,10 +5,11 @@ import { requireProSession } from '@/lib/auth/session';
 import { sql } from '@/lib/db';
 import { put } from '@vercel/blob';
 import { generateTrainingSetSpots, type TierMode } from '@/lib/training/generate';
+import { computeSlamOptions, type ComponentId } from '@/lib/items/recipes';
 
 async function assertSetOwnership(proId: string, setId: string) {
-  const owner = await sql<{ id: string; tier_mode: TierMode }>`
-    select id, tier_mode from training_sets
+  const owner = await sql<{ id: string; tier_mode: TierMode; mode?: string }>`
+    select id, tier_mode, mode from training_sets
     where id = ${setId} and pro_id = ${proId}
     limit 1
   `;
@@ -103,10 +104,17 @@ export async function saveSpotAnswerAction(formData: FormData) {
     redirect('/admin');
   }
 
-  await assertSetOwnership(session.proId!, setId);
+  const owner = await assertSetOwnership(session.proId!, setId);
 
   const [correctPickId] = correctPickRaw.split('::');
-  const actionType = correctPickId?.endsWith('1') ? 'reroll_then_pick' : 'pick';
+
+  const actionType = (() => {
+    if (owner.mode === 'item_2_1') {
+      if (correctPickId === 'no_slam') return 'no_slam';
+      return correctPickId ? 'slam' : null;
+    }
+    return correctPickId?.endsWith('1') ? 'reroll_then_pick' : 'pick';
+  })();
 
   const proRollOrder = (() => {
     try {
@@ -120,19 +128,59 @@ export async function saveSpotAnswerAction(formData: FormData) {
     }
   })();
 
+  const itemComponents: ComponentId[] = (() => {
+    if (owner.mode !== 'item_2_1') return [];
+    const raw = String(formData.get('itemComponents') ?? '[]');
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .map((x) => String(x))
+        .filter((x): x is ComponentId =>
+          x === 'bf' || x === 'bow' || x === 'rod' || x === 'tear' || x === 'chain' || x === 'cloak' || x === 'belt' || x === 'glove'
+        );
+    } catch {
+      return [];
+    }
+  })();
+
+  const itemSlamOptions = owner.mode === 'item_2_1' ? computeSlamOptions(itemComponents, 4) : [];
+
   try {
-    await sql`
-      update training_spots
-      set correct_pick_id = ${correctPickId || null},
-          correct_action_type = ${correctPickId ? actionType : null},
-          correct_augment_note = ${note || null},
-          pro_roll_order = ${JSON.stringify(proRollOrder)}::jsonb
-      where set_id = ${setId} and idx = ${idx}
-    `;
+    if (owner.mode === 'item_2_1') {
+      await sql`
+        update training_spots
+        set correct_pick_id = ${correctPickId === 'no_slam' ? null : correctPickId || null},
+            correct_action_type = ${actionType},
+            correct_augment_note = ${note || null},
+            item_components = ${JSON.stringify(itemComponents)}::jsonb,
+            item_slam_options = ${JSON.stringify(itemSlamOptions)}::jsonb
+        where set_id = ${setId} and idx = ${idx}
+      `;
+    } else {
+      await sql`
+        update training_spots
+        set correct_pick_id = ${correctPickId || null},
+            correct_action_type = ${correctPickId ? actionType : null},
+            correct_augment_note = ${note || null},
+            pro_roll_order = ${JSON.stringify(proRollOrder)}::jsonb
+        where set_id = ${setId} and idx = ${idx}
+      `;
+    }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    if (msg.toLowerCase().includes('pro_roll_order') && msg.toLowerCase().includes('does not exist')) {
-      // Backwards compatible: if migration hasn't been applied yet.
+    const lower = msg.toLowerCase();
+
+    // Backwards compatible: if migrations haven't been applied yet.
+    if (owner.mode === 'item_2_1' && (lower.includes('item_components') || lower.includes('item_slam_options')) && lower.includes('does not exist')) {
+      await sql`
+        update training_spots
+        set correct_pick_id = ${correctPickId === 'no_slam' ? null : correctPickId || null},
+            correct_action_type = ${actionType},
+            correct_augment_note = ${note || null}
+        where set_id = ${setId} and idx = ${idx}
+      `;
+    } else if (lower.includes('pro_roll_order') && lower.includes('does not exist')) {
       await sql`
         update training_spots
         set correct_pick_id = ${correctPickId || null},

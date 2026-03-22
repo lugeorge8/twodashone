@@ -33,7 +33,7 @@ export async function createTrainingSetAction(formData: FormData) {
     redirect('/admin/sets/new?error=tier');
   }
 
-  if (!['augment_2_1', 'augment_3_2', 'augment_4_2'].includes(mode)) {
+  if (!['augment_2_1', 'augment_3_2', 'augment_4_2', 'item_2_1'].includes(mode)) {
     redirect('/admin/sets/new?error=mode');
   }
 
@@ -61,7 +61,12 @@ export async function createTrainingSetAction(formData: FormData) {
   const augStage = modeToAugmentStage(mode);
   const stageLabel = modeToStageLabel(mode);
 
-  const gen = await generateTrainingSetSpots({ tierMode, stage: augStage, stageLabel });
+  const gen =
+    mode === 'item_2_1'
+      ? {
+          spots: Array.from({ length: 20 }).map((_, i) => ({ idx: i + 1, stage: stageLabel, options: [] })),
+        }
+      : await generateTrainingSetSpots({ tierMode, stage: augStage, stageLabel });
 
   // Pick 20 screenshots for this patch (repeats ok).
   const shots = await sql<{ image_url: string }>`

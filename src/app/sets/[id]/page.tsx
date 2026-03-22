@@ -19,8 +19,8 @@ function normalizeOptions(raw: unknown): Array<Required<Pick<Opt, 'id' | 'name' 
 export default async function SetPlayPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  const setRes = await sql<{ id: string; title: string; patch: string; tier_mode: string }>`
-    select id, title, patch, tier_mode
+  const setRes = await sql<{ id: string; title: string; patch: string; tier_mode: string; mode: string }>`
+    select id, title, patch, tier_mode, mode
     from training_sets
     where id = ${id} and status = 'published'
     limit 1
@@ -37,6 +37,8 @@ export default async function SetPlayPage({ params }: { params: Promise<{ id: st
     );
   }
 
+  const isItemMode = set.mode === 'item_2_1';
+
   // Only include "complete" spots
   // Backwards compatible: older DBs may not have pro_roll_order yet.
   let spots:
@@ -44,17 +46,19 @@ export default async function SetPlayPage({ params }: { params: Promise<{ id: st
         idx: number;
         screenshot_url: string;
         augment_options: unknown;
-        correct_pick_id: string;
-        correct_action_type: string;
+        correct_pick_id: string | null;
+        correct_action_type: string | null;
         correct_augment_note: string | null;
         pro_roll_order: unknown;
+        item_components: unknown;
+        item_slam_options: unknown;
       }>>>
     | Awaited<ReturnType<typeof sql<{
         idx: number;
         screenshot_url: string;
         augment_options: unknown;
-        correct_pick_id: string;
-        correct_action_type: string;
+        correct_pick_id: string | null;
+        correct_action_type: string | null;
         correct_augment_note: string | null;
       }>>>;
 
@@ -63,34 +67,47 @@ export default async function SetPlayPage({ params }: { params: Promise<{ id: st
       idx: number;
       screenshot_url: string;
       augment_options: unknown;
-      correct_pick_id: string;
-      correct_action_type: string;
+      correct_pick_id: string | null;
+      correct_action_type: string | null;
       correct_augment_note: string | null;
       pro_roll_order: unknown;
+      item_components: unknown;
+      item_slam_options: unknown;
     }>`
-      select idx, screenshot_url, augment_options, correct_pick_id, correct_action_type, correct_augment_note, pro_roll_order
+      select idx, screenshot_url, augment_options, correct_pick_id, correct_action_type, correct_augment_note,
+             pro_roll_order, item_components, item_slam_options
       from training_spots
       where set_id = ${id}
         and screenshot_url is not null and screenshot_url <> ''
-        and correct_pick_id is not null and correct_pick_id <> ''
+        and (
+          (${isItemMode} and correct_action_type is not null and correct_action_type <> '')
+          or (not ${isItemMode} and correct_pick_id is not null and correct_pick_id <> '')
+        )
       order by idx asc
     `;
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    if (msg.toLowerCase().includes('pro_roll_order') && msg.toLowerCase().includes('does not exist')) {
+    const lower = msg.toLowerCase();
+    if (
+      (lower.includes('pro_roll_order') || lower.includes('item_components') || lower.includes('item_slam_options')) &&
+      lower.includes('does not exist')
+    ) {
       spots = await sql<{
         idx: number;
         screenshot_url: string;
         augment_options: unknown;
-        correct_pick_id: string;
-        correct_action_type: string;
+        correct_pick_id: string | null;
+        correct_action_type: string | null;
         correct_augment_note: string | null;
       }>`
         select idx, screenshot_url, augment_options, correct_pick_id, correct_action_type, correct_augment_note
         from training_spots
         where set_id = ${id}
           and screenshot_url is not null and screenshot_url <> ''
-          and correct_pick_id is not null and correct_pick_id <> ''
+          and (
+            (${isItemMode} and correct_action_type is not null and correct_action_type <> '')
+            or (not ${isItemMode} and correct_pick_id is not null and correct_pick_id <> '')
+          )
         order by idx asc
       `;
     } else {
@@ -101,11 +118,14 @@ export default async function SetPlayPage({ params }: { params: Promise<{ id: st
   const playable = spots.rows.map((s: any) => ({
     idx: s.idx,
     screenshotUrl: s.screenshot_url,
+    mode: set.mode,
     options: normalizeOptions(s.augment_options),
     correctPickId: s.correct_pick_id,
     correctActionType: s.correct_action_type,
     note: s.correct_augment_note,
     proRollOrder: Array.isArray(s.pro_roll_order) ? (s.pro_roll_order as any[]).map((x) => String(x)) : [],
+    itemComponents: Array.isArray(s.item_components) ? (s.item_components as any[]).map((x) => String(x)) : [],
+    itemSlamOptions: Array.isArray(s.item_slam_options) ? s.item_slam_options : [],
   }));
 
   return (

@@ -4,6 +4,7 @@ import { requireProSession } from '@/lib/auth/session';
 import { sql } from '@/lib/db';
 import { generateSpotAugmentsAction, saveSpotAnswerAction } from './spot-actions';
 import AugmentActionClient from './augment-action-client';
+import ItemSlamActionClient from './item-slam-action-client';
 
 type Opt = {
   id?: 'a' | 'b' | 'c' | 'a1' | 'b1' | 'c1';
@@ -36,8 +37,8 @@ export default async function AdminSpotPage({ params }: { params: Promise<{ id: 
     return <div className="min-h-screen bg-zinc-50 p-10">Invalid spot.</div>;
   }
 
-  const setRes = await sql<{ id: string; patch: string; tier_mode: string; status: string }>`
-    select id, patch, tier_mode, status
+  const setRes = await sql<{ id: string; patch: string; tier_mode: string; status: string; mode: string }>`
+    select id, patch, tier_mode, status, mode
     from training_sets
     where id = ${setId} and pro_id = ${session.proId!}
     limit 1
@@ -77,15 +78,19 @@ export default async function AdminSpotPage({ params }: { params: Promise<{ id: 
       correct_action_type: string | null;
       correct_augment_note: string | null;
       pro_roll_order: unknown;
+      item_components: unknown;
+      item_slam_options: unknown;
     }>`
-      select idx, stage, screenshot_url, augment_options, correct_pick_id, correct_action_type, correct_augment_note, pro_roll_order
+      select idx, stage, screenshot_url, augment_options, correct_pick_id, correct_action_type, correct_augment_note,
+             pro_roll_order, item_components, item_slam_options
       from training_spots
       where set_id = ${setId} and idx = ${spotIdx}
       limit 1
     `;
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    if (msg.toLowerCase().includes('pro_roll_order') && msg.toLowerCase().includes('does not exist')) {
+    const lower = msg.toLowerCase();
+    if ((lower.includes('pro_roll_order') || lower.includes('item_components') || lower.includes('item_slam_options')) && lower.includes('does not exist')) {
       spotRes = await sql<{
         idx: number;
         stage: string;
@@ -108,8 +113,13 @@ export default async function AdminSpotPage({ params }: { params: Promise<{ id: 
   const spot = spotRes.rows[0] as any;
   if (!spot) return <div className="min-h-screen bg-zinc-50 p-10">Spot not found.</div>;
 
+  const isItemMode = set.mode === 'item_2_1';
+
   const options = normalizeOptions(spot.augment_options);
   const proRollOrder = Array.isArray(spot.pro_roll_order) ? (spot.pro_roll_order as any[]).map((x) => String(x)) : [];
+  const itemComponents = Array.isArray(spot.item_components)
+    ? (spot.item_components as any[]).map((x) => String(x))
+    : [];
   const nextIdx = spotIdx < 20 ? spotIdx + 1 : null;
 
   return (
@@ -158,19 +168,23 @@ export default async function AdminSpotPage({ params }: { params: Promise<{ id: 
 
         <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-sm font-semibold">Augments (A/B/C + hidden A1/B1/C1)</h2>
+            <h2 className="text-sm font-semibold">
+              {isItemMode ? 'Items (slam vs no slam)' : 'Augments (A/B/C + hidden A1/B1/C1)'}
+            </h2>
 
-            <form action={generateSpotAugmentsAction}>
-              <input type="hidden" name="setId" value={setId} />
-              <input type="hidden" name="idx" value={spotIdx} />
-              <button
-                type="submit"
-                disabled={!spot.screenshot_url}
-                className="h-9 rounded-xl border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900"
-              >
-                Generate augments
-              </button>
-            </form>
+            {isItemMode ? null : (
+              <form action={generateSpotAugmentsAction}>
+                <input type="hidden" name="setId" value={setId} />
+                <input type="hidden" name="idx" value={spotIdx} />
+                <button
+                  type="submit"
+                  disabled={!spot.screenshot_url}
+                  className="h-9 rounded-xl border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900"
+                >
+                  Generate augments
+                </button>
+              </form>
+            )}
           </div>
 
           {!spot.screenshot_url ? (
@@ -183,17 +197,34 @@ export default async function AdminSpotPage({ params }: { params: Promise<{ id: 
             <input type="hidden" name="setId" value={setId} />
             <input type="hidden" name="idx" value={spotIdx} />
 
-            <AugmentActionClient options={options as any} defaultCorrectPickId={spot.correct_pick_id} disabled={!spot.screenshot_url} />
+            {isItemMode ? (
+              <ItemSlamActionClient
+                defaultComponents={itemComponents as any}
+                defaultCorrectActionType={spot.correct_action_type}
+                defaultCorrectPickId={spot.correct_pick_id}
+                disabled={!spot.screenshot_url}
+              />
+            ) : (
+              <>
+                <AugmentActionClient
+                  options={options as any}
+                  defaultCorrectPickId={spot.correct_pick_id}
+                  disabled={!spot.screenshot_url}
+                />
 
-            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
-              <div className="font-semibold">Recorded reroll order</div>
-              <div className="mt-1">
-                {proRollOrder.length ? proRollOrder.map((s) => s.toUpperCase()).join(' → ') : 'None (no rerolls saved)'}
-              </div>
-              <div className="mt-1 text-zinc-500 dark:text-zinc-400">
-                This updates after you click “Save answer”.
-              </div>
-            </div>
+                <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
+                  <div className="font-semibold">Recorded reroll order</div>
+                  <div className="mt-1">
+                    {proRollOrder.length
+                      ? proRollOrder.map((s) => s.toUpperCase()).join(' → ')
+                      : 'None (no rerolls saved)'}
+                  </div>
+                  <div className="mt-1 text-zinc-500 dark:text-zinc-400">
+                    This updates after you click “Save answer”.
+                  </div>
+                </div>
+              </>
+            )}
 
             <label className="grid gap-1">
               <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
