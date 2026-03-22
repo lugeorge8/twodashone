@@ -312,11 +312,9 @@ export default function SetPlayClient({
             </div>
           )}
 
-          {spot.proRollOrder?.length ? (
-            <div className="mt-3 text-xs text-zinc-600 dark:text-zinc-300">
-              Pro rerolls: {spot.proRollOrder.map((s) => s.toUpperCase()).join(' → ')}
-            </div>
-          ) : null}
+          <div className="mt-3 text-xs text-zinc-600 dark:text-zinc-300">
+            <span className="font-semibold">Reroll Order</span>: {spot.proRollOrder?.length ? spot.proRollOrder.map((s) => s.toUpperCase()).join(' → ') : 'None'}
+          </div>
 
           {spot.note ? (
             <div className="mt-3 whitespace-pre-wrap text-zinc-700 dark:text-zinc-200">
