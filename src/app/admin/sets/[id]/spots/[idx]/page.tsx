@@ -45,24 +45,71 @@ export default async function AdminSpotPage({ params }: { params: Promise<{ id: 
   const set = setRes.rows[0];
   if (!set) return <div className="min-h-screen bg-zinc-50 p-10">Not found.</div>;
 
-  const spotRes = await sql<{
-    idx: number;
-    stage: string;
-    screenshot_url: string | null;
-    augment_options: unknown;
-    correct_pick_id: string | null;
-    correct_action_type: string | null;
-    correct_augment_note: string | null;
-  }>`
-    select idx, stage, screenshot_url, augment_options, correct_pick_id, correct_action_type, correct_augment_note
-    from training_spots
-    where set_id = ${setId} and idx = ${spotIdx}
-    limit 1
-  `;
-  const spot = spotRes.rows[0];
+  // Backwards compatible: older DBs may not have pro_roll_order yet.
+  let spotRes:
+    | Awaited<ReturnType<typeof sql<{
+        idx: number;
+        stage: string;
+        screenshot_url: string | null;
+        augment_options: unknown;
+        correct_pick_id: string | null;
+        correct_action_type: string | null;
+        correct_augment_note: string | null;
+        pro_roll_order: unknown;
+      }>>>
+    | Awaited<ReturnType<typeof sql<{
+        idx: number;
+        stage: string;
+        screenshot_url: string | null;
+        augment_options: unknown;
+        correct_pick_id: string | null;
+        correct_action_type: string | null;
+        correct_augment_note: string | null;
+      }>>>;
+
+  try {
+    spotRes = await sql<{
+      idx: number;
+      stage: string;
+      screenshot_url: string | null;
+      augment_options: unknown;
+      correct_pick_id: string | null;
+      correct_action_type: string | null;
+      correct_augment_note: string | null;
+      pro_roll_order: unknown;
+    }>`
+      select idx, stage, screenshot_url, augment_options, correct_pick_id, correct_action_type, correct_augment_note, pro_roll_order
+      from training_spots
+      where set_id = ${setId} and idx = ${spotIdx}
+      limit 1
+    `;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.toLowerCase().includes('pro_roll_order') && msg.toLowerCase().includes('does not exist')) {
+      spotRes = await sql<{
+        idx: number;
+        stage: string;
+        screenshot_url: string | null;
+        augment_options: unknown;
+        correct_pick_id: string | null;
+        correct_action_type: string | null;
+        correct_augment_note: string | null;
+      }>`
+        select idx, stage, screenshot_url, augment_options, correct_pick_id, correct_action_type, correct_augment_note
+        from training_spots
+        where set_id = ${setId} and idx = ${spotIdx}
+        limit 1
+      `;
+    } else {
+      throw e;
+    }
+  }
+
+  const spot = spotRes.rows[0] as any;
   if (!spot) return <div className="min-h-screen bg-zinc-50 p-10">Spot not found.</div>;
 
   const options = normalizeOptions(spot.augment_options);
+  const proRollOrder = Array.isArray(spot.pro_roll_order) ? (spot.pro_roll_order as any[]).map((x) => String(x)) : [];
   const nextIdx = spotIdx < 20 ? spotIdx + 1 : null;
 
   return (
@@ -137,6 +184,16 @@ export default async function AdminSpotPage({ params }: { params: Promise<{ id: 
             <input type="hidden" name="idx" value={spotIdx} />
 
             <AugmentActionClient options={options as any} defaultCorrectPickId={spot.correct_pick_id} disabled={!spot.screenshot_url} />
+
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
+              <div className="font-semibold">Recorded reroll order</div>
+              <div className="mt-1">
+                {proRollOrder.length ? proRollOrder.map((s) => s.toUpperCase()).join(' → ') : 'None (no rerolls saved)'}
+              </div>
+              <div className="mt-1 text-zinc-500 dark:text-zinc-400">
+                This updates after you click “Save answer”.
+              </div>
+            </div>
 
             <label className="grid gap-1">
               <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
